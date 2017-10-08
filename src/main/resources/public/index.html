@@ -33,24 +33,10 @@
 
 <div class="album text-muted">
     <div class="container">
-        <div class="row">
-            <div class="card">
-                <img src="/plot/a2b9e1a0-2e4a-42d1-b0cc-7a2dfadacd2d/356x280" alt="Card image cap">
-            </div>
-            <div class="card">
-                <img src="/plot/cb638004-661c-4c11-802c-1fc1e2312577/356x280" alt="Card image cap">
-            </div>
-            <div class="card">
-                <img src="/plot/2bab0301-8e3d-40f2-abcc-54e041074d10/356x280" alt="Card image cap">
-            </div>
-            <div class="card">
-                <img src="/plot/25eed61f-9708-4b6d-921d-034b85c0db6e/356x280" alt="Card image cap">
-            </div>
+        <div class="row" id="slideshow">
+
         </div>
-        <div class="row">
-            <p>Available plots</p>
-            <ul id="plots"></ul>
-        </div>
+
     </div>
 </div>
 
@@ -68,7 +54,10 @@
 
         jQuery.get('/plot/', function(data){
             data.forEach(function (t) {
-                $("#plots").append("<li>/plot/" + t.public_uuid + "/original</li>");
+                $("#slideshow").append('<div class="card">' +
+                    '<img src="/plot/'+ t.public_uuid +'/356x280" alt="">' +
+                    '</div>')
+
             });
 
         });
