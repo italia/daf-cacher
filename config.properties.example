@@ -1,0 +1,19 @@
+# Metabase config section
+# NO TRAILING SLASH
+metabase.api_endpoint=https://graph.daf.teamdigitale.it/api
+metabase.host=https://graph.daf.teamdigitale.it
+metabase.api_token=xxxxxxx-xxxxx-xxxxx-xxxx
+metabase.username=user@host.com
+metabase.password=xxxxxx
+
+# Plot caching config section
+
+caching.selenium_hub=http://localhost:4444/wd/hub
+
+# Expire after X minutes
+caching.ttl=10
+# Redis used as caching and message queue
+caching.redis_host=localhost
+# Refresh data from metabase API every X minutes.
+# To cache missing, this value should be half of caching.ttl value
+caching.refresh_every=5
