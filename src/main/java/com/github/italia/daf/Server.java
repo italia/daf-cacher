@@ -15,6 +15,8 @@ public class Server {
         final Properties properties = new Configuration(args[0]).load();
         final JedisPool pool = new JedisPool(new JedisPoolConfig(), properties.getProperty("caching.redis_host"));
 
+        staticFiles.location("/public");
+
         get("/plot/:id/:geometry", (request, response) -> {
 
             String buffer;
