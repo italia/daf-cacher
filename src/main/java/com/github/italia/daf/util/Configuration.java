@@ -15,7 +15,7 @@ public class Configuration {
     }
 
     public Properties load() throws IOException {
-        try (FileInputStream in = new FileInputStream(propFile)){
+        try (FileInputStream in = new FileInputStream(propFile)) {
             properties.load(in);
         }
         return properties;

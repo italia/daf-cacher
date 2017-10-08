@@ -9,7 +9,9 @@ public class LoggerFactory {
     static {
         try (InputStream stream = LoggerFactory.class.getClassLoader().getResourceAsStream("logging.properties")) {
             LogManager.getLogManager().readConfiguration(stream);
-        } catch (IOException e) { e.printStackTrace(); }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static Logger getLogger(final String className) {

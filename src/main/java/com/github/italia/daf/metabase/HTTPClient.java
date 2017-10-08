@@ -42,14 +42,15 @@ public class HTTPClient {
         this.authenticated = true;
     }
 
-    public boolean isAuthenticated(){
+    public boolean isAuthenticated() {
         return this.authenticated;
     }
 
     public List<Card> getPublicCards() throws IOException {
         final Content content = executeGetAuthenticatedMethod("/card/public");
         final Gson gson = new GsonBuilder().create();
-        return gson.fromJson(content.asString(), new TypeToken<List<Card>>(){}.getType());
+        return gson.fromJson(content.asString(), new TypeToken<List<Card>>() {
+        }.getType());
     }
 
     private Content executeGetAuthenticatedMethod(final String apiEndpoint) throws IOException {
@@ -64,7 +65,7 @@ public class HTTPClient {
         private String username;
         private String password;
 
-        public Credential(final String username, final String password){
+        public Credential(final String username, final String password) {
             this.username = username;
             this.password = password;
         }
@@ -73,10 +74,10 @@ public class HTTPClient {
     public static class Token {
         private String id;
 
-        public Token(){
+        public Token() {
         }
 
-        public Token(String token){
+        public Token(String token) {
             this.id = token;
         }
     }
@@ -84,7 +85,8 @@ public class HTTPClient {
     public static class Card {
         public int id;
         public String public_uuid;
-        public String toString(){
+
+        public String toString() {
             return "id:" + id + " public_uuid:" + public_uuid;
         }
     }

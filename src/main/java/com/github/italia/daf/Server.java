@@ -1,4 +1,5 @@
 package com.github.italia.daf;
+
 import com.github.italia.daf.metabase.HTTPClient;
 import com.github.italia.daf.metabase.PlotSniper;
 import com.github.italia.daf.selenium.Browser;
@@ -17,7 +18,9 @@ import java.util.Base64;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import static spark.Spark.*;
+import static spark.Spark.get;
+import static spark.Spark.staticFiles;
+
 public class Server {
 
 
@@ -25,7 +28,7 @@ public class Server {
         final Properties properties = new Configuration(args[0]).load();
         final JedisPool pool = new JedisPool(new JedisPoolConfig(), properties.getProperty("caching.redis_host"));
 
-        final ThreadLocal<WebDriver> webDriverLocal = new ThreadLocal<WebDriver>(){
+        final ThreadLocal<WebDriver> webDriverLocal = new ThreadLocal<WebDriver>() {
             @Override
             protected WebDriver initialValue() {
                 final WebDriver webDriver;
@@ -75,7 +78,7 @@ public class Server {
             String geometry = request.params(":geometry");
 
             // Parameter check
-            if (!geometry.equalsIgnoreCase("original")){
+            if (!geometry.equalsIgnoreCase("original")) {
                 try {
                     PlotSniper.Geometry.fromString(geometry);
                 } catch (NumberFormatException e) {
@@ -83,7 +86,7 @@ public class Server {
                     return null;
                 }
             }
-            
+
             try (Jedis jedis = pool.getResource()) {
                 String key = "metabase-cacher:keys:" + request.params(":id") + ":" + geometry;
                 buffer = jedis.get(key);
@@ -110,7 +113,7 @@ public class Server {
 
                     try {
                         decoded = sniper.shootAsByte(url);
-                    } catch (Exception ex){
+                    } catch (Exception ex) {
                         ex.printStackTrace();
                         response.status(404);
                         return null;
@@ -132,8 +135,8 @@ public class Server {
             // A new size requested?
             if (!geometry.equals("original")) {
                 decoded = new PlotSniper
-                                .Resize(decoded)
-                                .to(PlotSniper.Geometry.fromString(geometry));
+                        .Resize(decoded)
+                        .to(PlotSniper.Geometry.fromString(geometry));
             }
             response.type("image/png");
             return decoded;

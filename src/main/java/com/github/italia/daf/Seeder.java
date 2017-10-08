@@ -13,7 +13,8 @@ import java.util.TimerTask;
 import java.util.logging.Logger;
 
 public class Seeder {
-    private static final Logger LOGGER = LoggerFactory.getLogger( CacheWorker.class.getName() );
+    private static final Logger LOGGER = LoggerFactory.getLogger(CacheWorker.class.getName());
+
     public static void main(String[] args) throws IOException {
         final Properties properties = new Configuration(args[0]).load();
         final Jedis jedis = new Jedis(properties.getProperty("caching.redis_host"));

@@ -4,11 +4,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 public class HTTPClientTest {
 
@@ -35,7 +34,7 @@ public class HTTPClientTest {
     public void testGetCards() throws Exception {
         HTTPClient client = new HTTPClient(new URL(System.getenv("METABASE_URL")), getCredential());
         client.authenticate();
-        final List<HTTPClient.Card> cards =  client.getPublicCards();
+        final List<HTTPClient.Card> cards = client.getPublicCards();
         assertTrue(!cards.isEmpty());
 
     }

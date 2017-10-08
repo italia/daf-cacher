@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 public class CacheWorker {
-    private static final Logger LOGGER = LoggerFactory.getLogger( CacheWorker.class.getName() );
+    private static final Logger LOGGER = LoggerFactory.getLogger(CacheWorker.class.getName());
 
     public static void main(String[] args) throws IOException {
 
@@ -38,7 +38,7 @@ public class CacheWorker {
 
 
         final List<PlotSniper.Geometry> sizes = new ArrayList<>();
-        for (final String token : properties.getProperty("caching.geometries").split("\\s+")){
+        for (final String token : properties.getProperty("caching.geometries").split("\\s+")) {
             final String[] gg = token.split("x");
             sizes.add(new PlotSniper.Geometry(Integer.parseInt(gg[0]), Integer.parseInt(gg[1])));
         }
@@ -49,7 +49,7 @@ public class CacheWorker {
             if (id == null)
                 continue;
 
-            if (id.equals("EXIT")){
+            if (id.equals("EXIT")) {
                 LOGGER.info("Magic word received ... exiting from the main loop");
                 break;
             }
@@ -62,7 +62,7 @@ public class CacheWorker {
             final String redisKey = "metabase-cacher:keys:" + id + ":original";
             jedis.setex(redisKey, Integer.parseInt(properties.getProperty("caching.ttl")) * 60, originalBase64Encoded);
 
-            for (final PlotSniper.Geometry g: sizes) {
+            for (final PlotSniper.Geometry g : sizes) {
                 LOGGER.info("Generate thumb of " + g);
                 final byte[] thumb = new PlotSniper.Resize(payload).to(g);
                 final String k = "metabase-cacher:keys:" + id + ":" + g;
@@ -73,7 +73,7 @@ public class CacheWorker {
             }
 
             LOGGER.info(url + " processed");
-            jedis.lrem("metabase-cacher:jobsbq",1, id);
+            jedis.lrem("metabase-cacher:jobsbq", 1, id);
         } while (true);
 
         jedis.close();

@@ -11,16 +11,16 @@ import java.net.URL;
 public class Browser {
 
     private final URL seleniumServerURL;
-    private final Capabilities caps ;
+    private final Capabilities caps;
     private WebDriver webDriver;
 
-    private Browser(URL seleniumServerURL, Capabilities caps){
+    private Browser(URL seleniumServerURL, Capabilities caps) {
         this.seleniumServerURL = seleniumServerURL;
         this.caps = caps;
     }
 
 
-    public WebDriver webDriver(){
+    public WebDriver webDriver() {
         if (this.webDriver == null)
             webDriver = new RemoteWebDriver(this.seleniumServerURL, this.caps);
 
@@ -32,7 +32,7 @@ public class Browser {
         private final URL seleniumServerURL;
         private DesiredCapabilities browserCaps;
 
-        public Builder(URL seleniumServerURL){
+        public Builder(URL seleniumServerURL) {
             this.seleniumServerURL = seleniumServerURL;
         }
 

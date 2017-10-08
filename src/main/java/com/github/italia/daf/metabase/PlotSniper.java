@@ -16,13 +16,14 @@ import java.io.IOException;
 
 public class PlotSniper {
     private WebDriver driver;
-    public PlotSniper(WebDriver driver){
+
+    public PlotSniper(WebDriver driver) {
         this.driver = driver;
     }
 
     public File shoot(final String url) throws IOException {
         visit(url);
-        final File file = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
+        final File file = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
 
         if (file == null)
             throw new IOException("Unable to save the viewport buffer");
@@ -33,7 +34,7 @@ public class PlotSniper {
 
     public byte[] shootAsByte(final String url) throws IOException {
         visit(url);
-        final byte[] buffer = ((TakesScreenshot)driver).getScreenshotAs(OutputType.BYTES);
+        final byte[] buffer = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
 
         if (buffer == null || buffer.length == 0)
             throw new IOException("Unable to save the viewport buffer");
@@ -43,7 +44,7 @@ public class PlotSniper {
 
     public String shootAsBase64(final String url) throws IOException {
         visit(url);
-        final String buffer = ((TakesScreenshot)driver).getScreenshotAs(OutputType.BASE64);
+        final String buffer = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BASE64);
 
         if (buffer == null || buffer.isEmpty())
             throw new IOException("Unable to save the viewport buffer");
@@ -51,7 +52,7 @@ public class PlotSniper {
         return buffer;
     }
 
-    private void visit(final String url){
+    private void visit(final String url) {
         driver.get(url);
         (new WebDriverWait(driver, 5)).until((ExpectedCondition<Boolean>) driver ->
                 driver.findElement(By.name("downarrow")).isDisplayed());
@@ -59,6 +60,7 @@ public class PlotSniper {
 
     public static class Resize {
         private byte[] buffer;
+
         public Resize(byte[] buffer) {
             this.buffer = buffer;
         }
@@ -71,7 +73,7 @@ public class PlotSniper {
             final ByteArrayOutputStream thumb = new ByteArrayOutputStream();
             Thumbnails.of(
                     new ByteArrayInputStream(this.buffer))
-                    .size(w,h)
+                    .size(w, h)
                     .keepAspectRatio(true)
                     .toOutputStream(thumb);
             return thumb.toByteArray();
@@ -82,12 +84,12 @@ public class PlotSniper {
         public int h;
         public int w;
 
-        public Geometry(int w, int h){
+        public Geometry(int w, int h) {
             this.w = w;
             this.h = h;
         }
 
-        public Geometry(){
+        public Geometry() {
         }
 
         @Override
