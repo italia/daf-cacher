@@ -17,3 +17,6 @@ caching.redis_host=localhost
 # Refresh data from metabase API every X minutes.
 # To cache missing, this value should be half of caching.ttl value
 caching.refresh_every=5
+
+# A space separated geometry representation of pre-cached thumbs size
+caching.geometries=100x100 400x300 280x500

@@ -4,15 +4,9 @@ import com.github.italia.daf.metabase.PlotSniper;
 import com.github.italia.daf.selenium.Browser;
 import com.github.italia.daf.util.Configuration;
 import com.github.italia.daf.util.LoggerFactory;
-import com.sun.xml.internal.rngom.parse.host.Base;
-import net.coobird.thumbnailator.Thumbnails;
 import org.openqa.selenium.WebDriver;
 import redis.clients.jedis.Jedis;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -26,22 +20,29 @@ public class CacheWorker {
     private static final Logger LOGGER = LoggerFactory.getLogger( CacheWorker.class.getName() );
 
     public static void main(String[] args) throws IOException {
+
         final Properties properties = new Configuration(args[0]).load();
+
         final Jedis jedis = new Jedis(properties.getProperty("caching.redis_host"));
+
         final WebDriver webDriver = new Browser
                 .Builder(new URL(properties.getProperty("caching.selenium_hub")))
                 .chrome()
                 .build()
                 .webDriver();
+        webDriver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
+
         final PlotSniper sniper = new PlotSniper(webDriver);
 
         final String metabaseHost = properties.getProperty("metabase.host");
-        webDriver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
+
 
         final List<PlotSniper.Geometry> sizes = new ArrayList<>();
-        sizes.add(new PlotSniper.Geometry(100, 100));
-        sizes.add(new PlotSniper.Geometry(400, 400));
-        sizes.add(new PlotSniper.Geometry(250, 250));
+        for (final String token : properties.getProperty("caching.geometries").split("\\s+")){
+            final String[] gg = token.split("x");
+            sizes.add(new PlotSniper.Geometry(Integer.parseInt(gg[0]), Integer.parseInt(gg[1])));
+        }
+
         do {
 
             final String id = jedis.brpoplpush("metabase-cacher:jobs", "metabase-cacher:jobsbq", 10);
@@ -64,7 +65,7 @@ public class CacheWorker {
             for (final PlotSniper.Geometry g: sizes) {
                 LOGGER.info("Generate thumb of " + g);
                 final byte[] thumb = new PlotSniper.Resize(payload).to(g);
-                String k = "metabase-cacher:keys:" + id + ":" + g;
+                final String k = "metabase-cacher:keys:" + id + ":" + g;
                 jedis.setex(k,
                         Integer.parseInt(properties.getProperty("caching.ttl")) * 60,
                         Base64.getEncoder().encodeToString(thumb)
