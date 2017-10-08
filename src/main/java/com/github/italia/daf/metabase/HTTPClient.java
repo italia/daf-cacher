@@ -22,13 +22,18 @@ public class HTTPClient {
         this.metabaseHost = metabaseHost;
         this.credential = credential;
         this.authenticated = false;
+    }
 
+    public HTTPClient(URL metabaseHost, final Token token) {
+        this.metabaseHost = metabaseHost;
+        this.token = token;
+        this.authenticated = true;
     }
 
 
     public void authenticate() throws IOException {
         final Gson gson = new GsonBuilder().create();
-        final Content response = Request.Post(this.metabaseHost.toString() + "session")
+        final Content response = Request.Post(this.metabaseHost.toString() + "/session")
                 .setHeader("Content-Type", "application/json")
                 .body(new StringEntity(gson.toJson(this.credential)))
                 .execute().returnContent();
@@ -42,14 +47,13 @@ public class HTTPClient {
     }
 
     public List<Card> getPublicCards() throws IOException {
-        final Content content = executeGetAuthenticatedMethod("card/public");
+        final Content content = executeGetAuthenticatedMethod("/card/public");
         final Gson gson = new GsonBuilder().create();
         return gson.fromJson(content.asString(), new TypeToken<List<Card>>(){}.getType());
 
     }
 
     private Content executeGetAuthenticatedMethod(final String apiEndpoint) throws IOException {
-        final Gson gson = new GsonBuilder().create();
         return Request.Get(this.metabaseHost.toString() + apiEndpoint)
                 .setHeader("Content-Type", "application/json")
                 .setHeader(HEADER_X_KEY, this.token.id)
@@ -69,8 +73,15 @@ public class HTTPClient {
 
     }
 
-    private class Token {
-        protected String id;
+    public static class Token {
+        private String id;
+
+        public Token(){
+        }
+
+        public Token(String token){
+            this.id = token;
+        }
     }
 
     public static class Card {
