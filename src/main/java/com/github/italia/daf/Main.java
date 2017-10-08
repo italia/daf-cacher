@@ -1,15 +1,11 @@
 package com.github.italia.daf;
 
 import com.github.italia.daf.metabase.HTTPClient;
+import com.github.italia.daf.metabase.PlotSniper;
 import com.github.italia.daf.selenium.Browser;
 import com.github.italia.daf.util.LoggerFactory;
 import org.apache.commons.io.FileUtils;
-import org.openqa.selenium.By;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,17 +47,11 @@ public class Main {
 //
 
         int i = 0;
+        final PlotSniper sniper = new PlotSniper(webDriver);
+
         for (final HTTPClient.Card card : client.getPublicCards()) {
             final String url = "https://graph.daf.teamdigitale.it/public/question/" + card.public_uuid;
-            webDriver.get(url);
-
-            (new WebDriverWait(webDriver, 10)).until((ExpectedCondition<Boolean>) driver -> {
-                LOGGER.info("Waiting for "+ url + " plot to be fully loaded...");
-                return driver.findElement(By.name("downarrow")).isDisplayed();
-            });
-
-
-            File src = ((TakesScreenshot)webDriver).getScreenshotAs(OutputType.FILE);
+            File src = sniper.shoot(url);
             try {
                 FileUtils.copyFile(src, new File("/tmp/" + (i++) + ".png"), true );
             } catch (IOException e) {

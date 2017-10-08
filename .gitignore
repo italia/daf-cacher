@@ -2,3 +2,4 @@
 target/
 .localenv
 *.iml
+.envrc
