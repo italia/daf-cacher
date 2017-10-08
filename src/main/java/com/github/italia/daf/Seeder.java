@@ -38,7 +38,7 @@ public class Seeder {
                 }
                 LOGGER.info("Sleeping until the next iteration");
             }
-        }, 0,  Integer.parseInt(properties.getProperty("caching.refresh_every")) * 1000 * 60);
+        }, 0, Integer.parseInt(properties.getProperty("caching.refresh_every")) * 1000 * 60);
 
 
     }
