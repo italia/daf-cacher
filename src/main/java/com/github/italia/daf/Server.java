@@ -74,6 +74,16 @@ public class Server {
             String buffer;
             String geometry = request.params(":geometry");
 
+            // Parameter check
+            if (!geometry.equalsIgnoreCase("original")){
+                try {
+                    PlotSniper.Geometry.fromString(geometry);
+                } catch (NumberFormatException e) {
+                    response.status(404);
+                    return null;
+                }
+            }
+            
             try (Jedis jedis = pool.getResource()) {
                 String key = "metabase-cacher:keys:" + request.params(":id") + ":" + geometry;
                 buffer = jedis.get(key);
