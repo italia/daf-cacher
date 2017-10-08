@@ -8,6 +8,8 @@ import redis.clients.jedis.Jedis;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Properties;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Logger;
 
 public class Seeder {
@@ -18,24 +20,26 @@ public class Seeder {
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> jedis.close()));
 
-        HTTPClient client = new HTTPClient(
+        final HTTPClient client = new HTTPClient(
                 new URL(properties.getProperty("metabase.api_endpoint")),
                 new HTTPClient.Token(properties.getProperty("metabase.api_token")));
 
-        do {
-            LOGGER.info("Fetch all public cards");
-            for (final HTTPClient.Card card : client.getPublicCards()) {
-                LOGGER.info("Card id " + card.public_uuid + " enqueued for caching");
-                jedis.lpush("metabase-cacher:jobs", card.public_uuid);
-            }
-
-            try {
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                LOGGER.info("Fetch all public cards");
+                try {
+                    for (final HTTPClient.Card card : client.getPublicCards()) {
+                        LOGGER.info("Card id " + card.public_uuid + " enqueued for caching");
+                        jedis.lpush("metabase-cacher:jobs", card.public_uuid);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 LOGGER.info("Sleeping until the next iteration");
-                Thread.sleep(Integer.parseInt(properties.getProperty("caching.refresh_every")) * 1000 * 60);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
-        } while (true);
+        }, 0,  Integer.parseInt(properties.getProperty("caching.refresh_every")) * 1000 * 60);
+
 
     }
 }
