@@ -79,6 +79,7 @@ public class Server {
                 buffer = jedis.get(key);
             }
 
+            // We have a cache hit
             if (buffer != null) {
                 response.type("image/png");
                 return Base64.getDecoder().decode(buffer);
@@ -91,8 +92,8 @@ public class Server {
                 String key = "metabase-cacher:keys:" + request.params(":id") + ":original";
                 buffer = jedis.get(key);
 
-
-                if (buffer == null || buffer.length() == 0) { // Cache is completely empty for this plot let's take a fresh snap
+                // Cache is completely empty for this plot let's take a fresh snap
+                if (buffer == null || buffer.length() == 0) {
                     final PlotSniper sniper = new PlotSniper(webDriverLocal.get());
                     final String metabaseHost = properties.getProperty("metabase.host");
                     final String url = metabaseHost + "/public/question/" + request.params(":id");
@@ -118,6 +119,7 @@ public class Server {
 
             }
 
+            // A new size requested?
             if (!geometry.equals("original")) {
                 decoded = new PlotSniper
                                 .Resize(decoded)
@@ -126,7 +128,6 @@ public class Server {
             response.type("image/png");
             return decoded;
         });
-
 
     }
 }

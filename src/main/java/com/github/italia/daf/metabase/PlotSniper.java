@@ -1,7 +1,6 @@
 package com.github.italia.daf.metabase;
 
 
-import com.github.italia.daf.util.LoggerFactory;
 import net.coobird.thumbnailator.Thumbnails;
 import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
@@ -10,15 +9,12 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Logger;
 
 public class PlotSniper {
-    private static final Logger LOGGER = LoggerFactory.getLogger( PlotSniper.class.getName() );
     private WebDriver driver;
     public PlotSniper(WebDriver driver){
         this.driver = driver;
@@ -59,7 +55,6 @@ public class PlotSniper {
         driver.get(url);
         (new WebDriverWait(driver, 5)).until((ExpectedCondition<Boolean>) driver ->
                 driver.findElement(By.name("downarrow")).isDisplayed());
-
     }
 
     public static class Resize {

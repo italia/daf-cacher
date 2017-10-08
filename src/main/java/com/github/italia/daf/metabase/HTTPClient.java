@@ -50,7 +50,6 @@ public class HTTPClient {
         final Content content = executeGetAuthenticatedMethod("/card/public");
         final Gson gson = new GsonBuilder().create();
         return gson.fromJson(content.asString(), new TypeToken<List<Card>>(){}.getType());
-
     }
 
     private Content executeGetAuthenticatedMethod(final String apiEndpoint) throws IOException {
@@ -69,8 +68,6 @@ public class HTTPClient {
             this.username = username;
             this.password = password;
         }
-
-
     }
 
     public static class Token {
@@ -87,7 +84,6 @@ public class HTTPClient {
     public static class Card {
         public int id;
         public String public_uuid;
-
         public String toString(){
             return "id:" + id + " public_uuid:" + public_uuid;
         }
