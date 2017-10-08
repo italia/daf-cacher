@@ -2,6 +2,7 @@ package com.github.italia.daf.metabase;
 
 
 import com.github.italia.daf.util.LoggerFactory;
+import net.coobird.thumbnailator.Thumbnails;
 import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
@@ -10,6 +11,8 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -54,9 +57,47 @@ public class PlotSniper {
 
     private void visit(final String url){
         driver.get(url);
-        (new WebDriverWait(driver, 10)).until((ExpectedCondition<Boolean>) driver -> {
-            return driver.findElement(By.name("downarrow")).isDisplayed();
-        });
+        (new WebDriverWait(driver, 10)).until((ExpectedCondition<Boolean>) driver ->
+                driver.findElement(By.name("downarrow")).isDisplayed());
 
+    }
+
+    public static class Resize {
+        private byte[] buffer;
+        public Resize(byte[] buffer) {
+            this.buffer = buffer;
+        }
+
+        public byte[] to(Geometry g) throws IOException {
+            return to(g.w, g.h);
+        }
+
+        public byte[] to(int w, int h) throws IOException {
+            final ByteArrayOutputStream thumb = new ByteArrayOutputStream();
+            Thumbnails.of(
+                    new ByteArrayInputStream(this.buffer))
+                    .size(w,h)
+                    .keepAspectRatio(true)
+                    .toOutputStream(thumb);
+            return thumb.toByteArray();
+        }
+    }
+
+    public static class Geometry {
+        public int h;
+        public int w;
+
+        public Geometry(int w, int h){
+            this.w = w;
+            this.h = h;
+        }
+
+        public Geometry(){
+        }
+
+        @Override
+        public String toString() {
+            return w + "x" + h;
+        }
     }
 }
