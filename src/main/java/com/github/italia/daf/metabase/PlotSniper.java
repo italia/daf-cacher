@@ -57,7 +57,7 @@ public class PlotSniper {
 
     private void visit(final String url){
         driver.get(url);
-        (new WebDriverWait(driver, 10)).until((ExpectedCondition<Boolean>) driver ->
+        (new WebDriverWait(driver, 5)).until((ExpectedCondition<Boolean>) driver ->
                 driver.findElement(By.name("downarrow")).isDisplayed());
 
     }
@@ -98,6 +98,11 @@ public class PlotSniper {
         @Override
         public String toString() {
             return w + "x" + h;
+        }
+
+        public static Geometry fromString(String g) {
+            final String[] gg = g.split("x");
+            return new Geometry(Integer.parseInt(gg[0]), Integer.parseInt(gg[1]));
         }
     }
 }
