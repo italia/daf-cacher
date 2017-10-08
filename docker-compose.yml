@@ -1,0 +1,39 @@
+version: '3'
+services:
+
+  seeder:
+    image: italia/daf-metabase-cacher
+    volumes:
+      - ./config-docker.properties:/etc/config.properties
+    command: seeder /etc/config.properties
+    depends_on:
+      - "redis"
+
+  worker:
+    image: italia/daf-metabase-cacher
+    volumes:
+      - ./config-docker.properties:/etc/config.properties
+    command: worker /etc/config.properties
+    depends_on:
+      - "selenium"
+      - "redis"
+
+  api:
+    image: italia/daf-metabase-cacher
+    ports:
+     - "4567:4567"
+    volumes:
+      - ./config-docker.properties:/etc/config.properties
+    command: server /etc/config.properties
+    depends_on:
+      - "redis"
+
+  redis:
+    image: "redis:alpine"
+
+  selenium:
+    image: "selenium/standalone-chrome:3.6.0-bromine"
+    ports:
+      - "5900:5900"
+    volumes:
+      - /dev/shm:/dev/shm

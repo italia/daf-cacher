@@ -4,3 +4,4 @@ target/
 *.iml
 .envrc
 config.properties
+config-docker.properties
