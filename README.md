@@ -11,7 +11,7 @@ iterates over the various plots, takes a screenshot, and caches them.
 * It generates for each plot a customizable set of different thumbs size
 * Embedding cached image in the page is easy as
  ```html
-<img src="//proxy/plot/:plot_puplic_id/:geometry">
+<img src="//proxy/plot/:plot_public_id/:geometry">
 ```
 Es:
 ```html
@@ -22,9 +22,18 @@ Es:
 
 ## Components
 
-* API: It is used to serve cached images to the client
-* Seeder: A recurring task would go through each available public plot by pinging Metabase's API and it will enqueue a new caching job 
-* Worker: Responsible to perform screenshot and thumbs, consuming jobs enqueued by the Seeder
+* API
+
+It is used to serve cached images to the client
+
+* Seeder
+
+A recurring task would go through each available public plot by pinging Metabase's API and it will enqueue a new caching job
+
+ 
+* Worker
+
+Responsible to perform screenshot and thumbs, consuming jobs enqueued by the Seeder
 
 ## How to run locally with docker compose:
 
