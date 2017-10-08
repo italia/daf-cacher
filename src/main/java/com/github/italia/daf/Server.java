@@ -1,7 +1,10 @@
 package com.github.italia.daf;
+import com.github.italia.daf.metabase.HTTPClient;
 import com.github.italia.daf.metabase.PlotSniper;
 import com.github.italia.daf.selenium.Browser;
 import com.github.italia.daf.util.Configuration;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.openqa.selenium.WebDriver;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -55,8 +58,16 @@ public class Server {
         };
 
 
-
         staticFiles.location("/public");
+
+        get("/plot/", (request, response) -> {
+            final HTTPClient client = new HTTPClient(
+                    new URL(properties.getProperty("metabase.api_endpoint")),
+                    new HTTPClient.Token(properties.getProperty("metabase.api_token")));
+            final Gson gson = new GsonBuilder().create();
+            response.type("application/json");
+            return gson.toJson(client.getPublicCards());
+        });
 
         get("/plot/:id/:geometry", (request, response) -> {
 
@@ -115,5 +126,7 @@ public class Server {
             response.type("image/png");
             return decoded;
         });
+
+
     }
 }
