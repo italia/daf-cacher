@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 set -x
-JAVA_CLASS_PATH=/usr/src/daf-metabase-cacher/*:/usr/src/daf-metabase-cacher/dependency/*
 
 MAIN_CLASS=""
+
 case "$1" in
         server)
             MAIN_CLASS=com.github.italia.daf.Server
@@ -21,4 +21,6 @@ case "$1" in
             exit 1
 esac
 
-exec java -cp $JAVA_CLASS_PATH $MAIN_CLASS $2
+exec java $JAVA_OPTS -cp $JAVA_CLASS_PATH $MAIN_CLASS config.properties
+
+

@@ -5,7 +5,7 @@ services:
     image: italia/daf-metabase-cacher
     volumes:
       - ./config-docker.properties:/etc/config.properties
-    command: seeder /etc/config.properties
+    command: seeder
     depends_on:
       - "redis"
 
@@ -13,7 +13,7 @@ services:
     image: italia/daf-metabase-cacher
     volumes:
       - ./config-docker.properties:/etc/config.properties
-    command: worker /etc/config.properties
+    command: worker
     depends_on:
       - "selenium"
       - "redis"
@@ -24,7 +24,7 @@ services:
      - "4567:4567"
     volumes:
       - ./config-docker.properties:/etc/config.properties
-    command: server /etc/config.properties
+    command: server
     depends_on:
       - "redis"
 
