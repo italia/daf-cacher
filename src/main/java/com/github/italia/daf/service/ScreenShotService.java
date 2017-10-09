@@ -41,7 +41,16 @@ public class ScreenShotService {
             final String k = REDIS_NS + id + ":" + g;
             jedis.setex(k, ttl * 60, Base64.getEncoder().encodeToString(thumb));
         }
+    }
 
+    public byte[] fetch(String id, String size) {
+        final String redisKey = REDIS_NS + id + ":" + size;
+        final String payload = jedis.get(redisKey);
+
+        if (payload != null && payload.length() > 0) {
+            return Base64.getDecoder().decode(payload);
+        }
+        return new byte[0];
     }
 
     private PlotSniper sniper() {

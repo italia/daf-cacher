@@ -3,6 +3,7 @@ package com.github.italia.daf;
 import com.github.italia.daf.metabase.HTTPClient;
 import com.github.italia.daf.metabase.PlotSniper;
 import com.github.italia.daf.selenium.Browser;
+import com.github.italia.daf.service.ScreenShotService;
 import com.github.italia.daf.util.Configuration;
 import com.github.italia.daf.util.LoggerFactory;
 import com.google.gson.Gson;
@@ -113,12 +114,20 @@ public class Server {
 
                 // Cache is completely empty for this plot let's take a fresh snap
                 if (buffer == null || buffer.length() == 0) {
-                    final PlotSniper sniper = new PlotSniper(webDriverLocal.get());
+
                     final String metabaseHost = properties.getProperty("metabase.host");
                     final String url = metabaseHost + "/public/question/" + request.params(":id");
 
+                    ScreenShotService service = new ScreenShotService.Builder()
+                            .ttl(Integer.parseInt(properties.getProperty("caching.ttl")))
+                            .plotUrl(new URL(url))
+                            .webDriver(webDriverLocal.get())
+                            .jedis(jedis)
+                            .id(request.params(":id"))
+                            .build();
                     try {
-                        decoded = sniper.shootAsByte(url);
+                        service.perform();
+                        decoded = service.fetch(request.params(":id"), "original");
                     } catch (Exception ex) {
                         LOGGER.log(Level.SEVERE, "an exception was thrown", ex);
                         response.status(404);
@@ -126,16 +135,10 @@ public class Server {
                     } finally {
                         webDriverLocal.remove();
                     }
-                    // Then cache it
-                    jedis.setex(key,
-                            Integer.parseInt(properties.getProperty("caching.ttl")) * 60,
-                            Base64.getEncoder().encodeToString(decoded)
-                    );
 
                 } else {
                     decoded = Base64.getDecoder().decode(buffer);
                 }
-
             }
 
             // A new size requested?

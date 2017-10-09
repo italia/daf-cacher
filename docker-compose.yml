@@ -35,5 +35,6 @@ services:
     image: "selenium/standalone-chrome:3.6.0-bromine"
     ports:
       - "5900:5900"
+      - "4444:4444"
     volumes:
       - /dev/shm:/dev/shm
