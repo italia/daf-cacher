@@ -4,6 +4,7 @@ import com.github.italia.daf.metabase.HTTPClient;
 import com.github.italia.daf.metabase.PlotSniper;
 import com.github.italia.daf.selenium.Browser;
 import com.github.italia.daf.util.Configuration;
+import com.github.italia.daf.util.LoggerFactory;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.openqa.selenium.WebDriver;
@@ -17,16 +18,20 @@ import java.net.URL;
 import java.util.Base64;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static spark.Spark.get;
 import static spark.Spark.staticFiles;
 
 public class Server {
 
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(Server.class.getName());
     public static void main(String[] args) throws IOException {
         final Properties properties = new Configuration(args[0]).load();
         final JedisPool pool = new JedisPool(new JedisPoolConfig(), properties.getProperty("caching.redis_host"));
+
+        Runtime.getRuntime().addShutdownHook(new Thread(pool::destroy));
 
         final ThreadLocal<WebDriver> webDriverLocal = new ThreadLocal<WebDriver>() {
             @Override
@@ -41,7 +46,8 @@ public class Server {
                     webDriver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
                     return webDriver;
                 } catch (MalformedURLException e) {
-                    e.printStackTrace();
+                    LOGGER.log(Level.SEVERE, "an exception was thrown", e);
+
                 }
                 return null;
             }
@@ -114,7 +120,7 @@ public class Server {
                     try {
                         decoded = sniper.shootAsByte(url);
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                        LOGGER.log(Level.SEVERE, "an exception was thrown", ex);
                         response.status(404);
                         return null;
                     } finally {

@@ -12,11 +12,12 @@ import java.net.URL;
 import java.util.List;
 
 public class HTTPClient {
+    private final static String HEADER_X_KEY = "X-Metabase-Session";
     private URL metabaseHost;
     private Credential credential;
-    boolean authenticated;
+    private boolean authenticated;
     private Token token;
-    final static String HEADER_X_KEY = "X-Metabase-Session";
+
 
     public HTTPClient(URL metabaseHost, final Credential credential) {
         this.metabaseHost = metabaseHost;

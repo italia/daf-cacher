@@ -54,8 +54,8 @@ public class PlotSniper {
 
     private void visit(final String url) {
         driver.get(url);
-        (new WebDriverWait(driver, 5)).until((ExpectedCondition<Boolean>) driver ->
-                driver.findElement(By.name("downarrow")).isDisplayed());
+        (new WebDriverWait(driver, 5)).until((ExpectedCondition<Boolean>) d ->
+                d.findElement(By.name("downarrow")).isDisplayed());
     }
 
     public static class Resize {
