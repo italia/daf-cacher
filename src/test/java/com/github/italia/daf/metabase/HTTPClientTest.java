@@ -44,6 +44,7 @@ public class HTTPClientTest {
     /**
      * /api/session has some non-configurable throttler attached
      * It makes te test to fail once in a while
+     *
      * @throws Exception
      */
     @Ignore

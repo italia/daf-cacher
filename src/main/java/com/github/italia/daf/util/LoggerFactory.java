@@ -17,4 +17,8 @@ public class LoggerFactory {
     public static Logger getLogger(final String className) {
         return Logger.getLogger(className);
     }
+
+    private LoggerFactory() {
+        throw new IllegalStateException("Utility class");
+    }
 }

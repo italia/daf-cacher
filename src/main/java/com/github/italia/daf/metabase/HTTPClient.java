@@ -12,11 +12,11 @@ import java.net.URL;
 import java.util.List;
 
 public class HTTPClient {
-    private final static String HEADER_X_KEY = "X-Metabase-Session";
     private URL metabaseHost;
     private Credential credential;
     private boolean authenticated;
     private Token token;
+    private final static String HEADER_X_KEY = "X-Metabase-Session";
 
 
     public HTTPClient(URL metabaseHost, final Credential credential) {
@@ -68,13 +68,30 @@ public class HTTPClient {
         private String password;
 
         public Credential(final String username, final String password) {
+            this.setUsername(username);
+            this.setPassword(password);
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
             this.username = username;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
             this.password = password;
         }
     }
 
     public static class Token {
         private String id;
+
         public Token() {
         }
 
@@ -82,7 +99,7 @@ public class HTTPClient {
             this.id = token;
         }
 
-        public String getId(){
+        public String getId() {
             return this.id;
         }
     }

@@ -54,8 +54,10 @@ public class PlotSniper {
 
     private void visit(final String url, int timeOutInSecond) {
         driver.get(url);
-        (new WebDriverWait(driver, timeOutInSecond)).until((ExpectedCondition<Boolean>) d ->
-                d.findElement(By.name("downarrow")).isDisplayed());
+        (new WebDriverWait(driver, timeOutInSecond)).until((ExpectedCondition<Boolean>) d -> {
+            assert d != null;
+            return d.findElement(By.name("downarrow")).isDisplayed();
+        });
     }
 
     public static class Resize {
@@ -81,8 +83,8 @@ public class PlotSniper {
     }
 
     public static class Geometry {
-        public int h;
-        public int w;
+        private int h;
+        private int w;
 
         public Geometry(int w, int h) {
             this.w = w;

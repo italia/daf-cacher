@@ -82,7 +82,7 @@ public class ApiServiceTest {
     }
 
     @Test
-    public void testPlotResize()throws IOException {
+    public void testPlotResize() throws IOException {
         final String plotId = "d68c6cae-0494-452a-871d-822e345c3981";
         final HttpResponse response = Request.Get("http://localhost:4567/plot/" + plotId + "/200x200")
                 .execute()
@@ -93,7 +93,7 @@ public class ApiServiceTest {
     }
 
     @Test
-    public void testPlotWrongParameter()throws IOException {
+    public void testPlotWrongParameter() throws IOException {
         final String plotId = "d68c6cae-0494-452a-871d-822e345c3981";
         final HttpResponse response = Request.Get("http://localhost:4567/plot/" + plotId + "/aaax200")
                 .execute()
