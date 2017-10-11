@@ -9,6 +9,8 @@ import org.openqa.selenium.WebDriver;
 import redis.clients.jedis.Jedis;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,11 +22,11 @@ import java.util.logging.Logger;
 public class CacheWorker {
     private static final Logger LOGGER = LoggerFactory.getLogger(CacheWorker.class.getName());
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, URISyntaxException {
 
         final Properties properties = new Configuration(args[0]).load();
 
-        try (final Jedis jedis = new Jedis(properties.getProperty("caching.redis_host"))) {
+        try (final Jedis jedis = new Jedis(new URI(properties.getProperty("caching.redis_host")))) {
 
             final WebDriver webDriver = new Browser
                     .Builder(new URL(properties.getProperty("caching.selenium_hub")))

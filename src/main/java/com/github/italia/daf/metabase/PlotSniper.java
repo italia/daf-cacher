@@ -21,8 +21,8 @@ public class PlotSniper {
         this.driver = driver;
     }
 
-    public File shoot(final String url) throws IOException {
-        visit(url);
+    public File shoot(final String url, int timeOutInSecond) throws IOException {
+        visit(url, timeOutInSecond);
         final File file = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
 
         if (file == null)
@@ -32,8 +32,8 @@ public class PlotSniper {
     }
 
 
-    public byte[] shootAsByte(final String url) throws IOException {
-        visit(url);
+    public byte[] shootAsByte(final String url, int timeOutInSecond) throws IOException {
+        visit(url, timeOutInSecond);
         final byte[] buffer = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
 
         if (buffer == null || buffer.length == 0)
@@ -42,8 +42,8 @@ public class PlotSniper {
         return buffer;
     }
 
-    public String shootAsBase64(final String url) throws IOException {
-        visit(url);
+    public String shootAsBase64(final String url, int timeOutInSecond) throws IOException {
+        visit(url, timeOutInSecond);
         final String buffer = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BASE64);
 
         if (buffer == null || buffer.isEmpty())
@@ -52,9 +52,9 @@ public class PlotSniper {
         return buffer;
     }
 
-    private void visit(final String url) {
+    private void visit(final String url, int timeOutInSecond) {
         driver.get(url);
-        (new WebDriverWait(driver, 5)).until((ExpectedCondition<Boolean>) d ->
+        (new WebDriverWait(driver, timeOutInSecond)).until((ExpectedCondition<Boolean>) d ->
                 d.findElement(By.name("downarrow")).isDisplayed());
     }
 

@@ -32,7 +32,7 @@ public class HTTPClient {
     }
 
 
-    public void authenticate() throws IOException {
+    public Token authenticate() throws IOException {
         final Gson gson = new GsonBuilder().create();
         final Content response = Request.Post(this.metabaseHost.toString() + "/session")
                 .setHeader("Content-Type", "application/json")
@@ -41,6 +41,7 @@ public class HTTPClient {
 
         this.token = gson.fromJson(response.asString(), Token.class);
         this.authenticated = true;
+        return this.token;
     }
 
     public boolean isAuthenticated() {
@@ -74,12 +75,15 @@ public class HTTPClient {
 
     public static class Token {
         private String id;
-
         public Token() {
         }
 
         public Token(String token) {
             this.id = token;
+        }
+
+        public String getId(){
+            return this.id;
         }
     }
 

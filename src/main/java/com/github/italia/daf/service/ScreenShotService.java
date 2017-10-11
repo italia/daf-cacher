@@ -24,13 +24,15 @@ public class ScreenShotService {
     private List<PlotSniper.Geometry> thumbs;
     private PlotSniper sniper;
     private String id;
+    private int timeOutInSecond;
 
     private ScreenShotService() {
+        timeOutInSecond = 5;
     }
 
     public void perform() throws IOException {
 
-        final byte[] payload = sniper().shootAsByte(url.toString());
+        final byte[] payload = sniper().shootAsByte(url.toString(), timeOutInSecond);
         final String originalBase64Encoded = Base64.getEncoder().encodeToString(payload);
         final String redisKey = REDIS_NS + id + ":original";
         jedis.setex(redisKey, ttl * 60, originalBase64Encoded);
