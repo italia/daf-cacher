@@ -16,7 +16,7 @@ public class HTTPClient {
     private Credential credential;
     private boolean authenticated;
     private Token token;
-    private final static String HEADER_X_KEY = "X-Metabase-Session";
+    private static final String HEADER_X_KEY = "X-Metabase-Session";
 
 
     public HTTPClient(URL metabaseHost, final Credential credential) {

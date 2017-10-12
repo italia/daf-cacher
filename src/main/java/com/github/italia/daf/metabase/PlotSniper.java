@@ -15,6 +15,8 @@ import java.io.File;
 import java.io.IOException;
 
 public class PlotSniper {
+
+    private static final String ERROR_MSG = "Unable to save the viewport buffer";
     private WebDriver driver;
 
     public PlotSniper(WebDriver driver) {
@@ -26,7 +28,7 @@ public class PlotSniper {
         final File file = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
 
         if (file == null)
-            throw new IOException("Unable to save the viewport buffer");
+            throw new IOException(ERROR_MSG);
 
         return file;
     }
@@ -37,7 +39,7 @@ public class PlotSniper {
         final byte[] buffer = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
 
         if (buffer == null || buffer.length == 0)
-            throw new IOException("Unable to save the viewport buffer");
+            throw new IOException(ERROR_MSG);
 
         return buffer;
     }
@@ -47,7 +49,7 @@ public class PlotSniper {
         final String buffer = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BASE64);
 
         if (buffer == null || buffer.isEmpty())
-            throw new IOException("Unable to save the viewport buffer");
+            throw new IOException(ERROR_MSG);
 
         return buffer;
     }
