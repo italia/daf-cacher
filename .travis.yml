@@ -1,0 +1,10 @@
+sudo: required
+
+services:
+  - docker
+
+language: java
+
+before_script:
+  - docker-compose -f junit-docker-compose.yml up -d
+  - until curl --silent --fail localhost:3000/api/health >/dev/null; do sleep 1; done
