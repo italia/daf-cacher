@@ -5,6 +5,7 @@ import com.github.italia.daf.util.Token;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.annotations.SerializedName;
 import org.apache.http.client.fluent.Content;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.entity.StringEntity;
@@ -66,11 +67,28 @@ public class HTTPClient {
 
 
     public static class Card {
-        public int id;
-        public String public_uuid;
+        private int id;
+        @SerializedName("public_uuid")
+        private String publicUuid;
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void setPublicUuid(String public_uuid) {
+            this.publicUuid = public_uuid;
+        }
+
+        public String getPublicUuid() {
+            return publicUuid;
+        }
 
         public String toString() {
-            return "id:" + id + " public_uuid:" + public_uuid;
+            return "id:" + id + " public_uuid:" + publicUuid;
         }
     }
 
