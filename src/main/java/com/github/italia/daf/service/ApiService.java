@@ -1,9 +1,8 @@
 package com.github.italia.daf.service;
 
 import com.github.italia.daf.metabase.HTTPClient;
-import com.github.italia.daf.metabase.PlotSniper;
 import com.github.italia.daf.selenium.Browser;
-import com.github.italia.daf.util.LoggerFactory;
+import com.github.italia.daf.util.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.openqa.selenium.WebDriver;
@@ -62,7 +61,7 @@ public class ApiService {
             // Parameter check
             if (!geometry.equalsIgnoreCase(ORIGINAL_SIZE)) {
                 try {
-                    PlotSniper.Geometry.fromString(geometry);
+                    Geometry.fromString(geometry);
                 } catch (NumberFormatException e) {
                     response.status(404);
                     return null;
@@ -70,7 +69,7 @@ public class ApiService {
             }
 
             try (Jedis jedis = jedisPool.getResource()) {
-                String key = "metabase-cacher:keys:" + request.params(":id") + ":" + geometry;
+                String key = "daf-cacher:keys:" + request.params(":id") + ":" + geometry;
                 buffer = jedis.get(key);
             }
 
@@ -84,36 +83,13 @@ public class ApiService {
             // Cache miss. Let's see if an original size is available
             try (Jedis jedis = jedisPool.getResource()) {
 
-                String key = "metabase-cacher:keys:" + request.params(":id") + ":" + ORIGINAL_SIZE;
+                String key = "daf-cacher:keys:" + request.params(":id") + ":" + ORIGINAL_SIZE;
                 buffer = jedis.get(key);
 
                 // Cache is completely empty for this plot let's take a fresh snap
                 if (buffer == null || buffer.length() == 0) {
-
-                    final String metabaseHost = properties.getProperty("metabase.host");
-                    final String url = metabaseHost + "/public/question/" + request.params(":id");
-
-
-                    try {
-                        ScreenShotService service = new ScreenShotService.Builder()
-                                .ttl(Integer.parseInt(properties.getProperty("caching.ttl")))
-                                .plotUrl(new URL(url))
-                                .webDriver(localWebDriver.get())
-                                .jedis(jedis)
-                                .id(request.params(":id"))
-                                .build();
-                        service.perform();
-                        decoded = service.fetch(request.params(":id"), ORIGINAL_SIZE);
-                    } catch (Exception ex) {
-                        LOGGER.log(Level.SEVERE, "an exception was thrown", ex);
-                        response.status(404);
-                        return null;
-                    } finally {
-                        try {
-                            localWebDriver.remove();
-                        } catch (Exception e) { /* ignored */}
-                    }
-
+                    response.status(404);
+                    return null;
                 } else {
                     decoded = Base64.getDecoder().decode(buffer);
                 }
@@ -121,9 +97,8 @@ public class ApiService {
 
             // A new size requested?
             if (!geometry.equals("original")) {
-                decoded = new PlotSniper
-                        .Resize(decoded)
-                        .to(PlotSniper.Geometry.fromString(geometry));
+                decoded = new Resize(decoded)
+                        .to(Geometry.fromString(geometry));
             }
             response.type("image/png");
             return decoded;
@@ -133,12 +108,17 @@ public class ApiService {
 
     private void handlePlotList() {
         get("/plot/", (request, response) -> {
-            final HTTPClient client = new HTTPClient(
-                    new URL(properties.getProperty("metabase.api_endpoint")),
-                    new HTTPClient.Token(properties.getProperty("metabase.api_token")));
+
+            Credential credential = new Credential(
+                    properties.getProperty("daf_api.user"),
+                    properties.getProperty("daf_api.password")
+            );
+
+            final com.github.italia.daf.dafapi.HTTPClient client = new com.github.italia.daf.dafapi.HTTPClient(new URL(properties.getProperty("daf_api.host")), credential);
+            client.authenticate();
             final Gson gson = new GsonBuilder().create();
             response.type("application/json");
-            return gson.toJson(client.getPublicCards());
+            return gson.toJson(client.getEmbeddableDataList());
         });
     }
 

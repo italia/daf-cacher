@@ -21,13 +21,13 @@
 
 <div class="navbar navbar-dark bg-dark">
     <div class="container d-flex justify-content-between">
-        <a href="#" class="navbar-brand">Plot cache demo</a>
+        <a href="#" class="navbar-brand">DAF cache demo</a>
     </div>
 </div>
 
 <section class="jumbotron text-center">
     <div class="container">
-        <h1 class="jumbotron-heading">Metabase plot thumbs</h1>
+        <h1 class="jumbotron-heading">DAF plot thumbs</h1>
     </div>
 </section>
 
@@ -59,7 +59,8 @@
         jQuery.get('/plot/', function (data) {
             data.forEach(function (t) {
                 $("#slideshow").append('<div class="card">' +
-                    '<img src="/plot/' + t.public_uuid + '/356x280" alt="">' +
+                    '<img src="/plot/' + t.identifier + '/356x280" alt="">' +
+                    '<p class="card-text">'+ t.title +'</p>' +
                     '</div>')
 
             });

@@ -1,7 +1,10 @@
 package com.github.italia.daf.service;
 
-import com.github.italia.daf.metabase.PlotSniper;
+import com.github.italia.daf.sniper.Page;
+import com.github.italia.daf.sniper.PageSniper;
+import com.github.italia.daf.util.Geometry;
 import com.github.italia.daf.util.LoggerFactory;
+import com.github.italia.daf.util.Resize;
 import org.openqa.selenium.WebDriver;
 import redis.clients.jedis.Jedis;
 
@@ -10,36 +13,38 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ScreenShotService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ScreenShotService.class.getName());
-    private static final String REDIS_NS = "metabase-cacher:keys:";
+    private static final String REDIS_NS = "daf-cacher:keys:";
     private Jedis jedis;
     private WebDriver webDriver;
     private URL url;
     private int ttl;
-    private List<PlotSniper.Geometry> thumbs;
-    private PlotSniper sniper;
+    private List<Geometry> thumbs;
     private String id;
     private int timeOutInSecond;
+    private PageSniper pageSniper;
+    private Page pageHandler;
 
     private ScreenShotService() {
         timeOutInSecond = 5;
     }
 
-    public void perform() throws IOException {
+    public void perform() throws IOException, TimeoutException {
 
-        final byte[] payload = sniper().shootAsByte(url.toString(), timeOutInSecond);
+        final byte[] payload = pageSniper.shoot(this.url.toString());
         final String originalBase64Encoded = Base64.getEncoder().encodeToString(payload);
         final String redisKey = REDIS_NS + id + ":original";
         jedis.setex(redisKey, ttl * 60, originalBase64Encoded);
 
-        for (final PlotSniper.Geometry g : thumbs) {
+        for (final Geometry g : thumbs) {
             LOGGER.log(Level.INFO, () -> "Generate thumb of size " + g);
-            final byte[] thumb = new PlotSniper.Resize(payload).to(g);
+            final byte[] thumb = new Resize(payload).to(g);
             final String k = REDIS_NS + id + ":" + g;
             jedis.setex(k, ttl * 60, Base64.getEncoder().encodeToString(thumb));
         }
@@ -53,13 +58,6 @@ public class ScreenShotService {
             return Base64.getDecoder().decode(payload);
         }
         return new byte[0];
-    }
-
-    private PlotSniper sniper() {
-        if (this.sniper == null)
-            this.sniper = new PlotSniper(webDriver);
-
-        return this.sniper;
     }
 
 
@@ -96,18 +94,30 @@ public class ScreenShotService {
             return this;
         }
 
-        public Builder geometries(final List<PlotSniper.Geometry> g) {
+        public Builder geometries(final List<Geometry> g) {
             this.service.thumbs.addAll(g);
             return this;
         }
 
-        public Builder geometry(final PlotSniper.Geometry g) {
+        public Builder geometry(final Geometry g) {
             this.service.thumbs.add(g);
+            return this;
+        }
+
+        public Builder timeout(int timeoutInSecond) {
+            this.service.timeOutInSecond = timeoutInSecond;
+            return this;
+        }
+
+        public Builder setPageHandler(Page handler) {
+            this.service.pageHandler = handler;
             return this;
         }
 
 
         public ScreenShotService build() {
+            this.service.pageSniper = new PageSniper(this.service.webDriver, this.service.timeOutInSecond);
+            this.service.pageSniper.setPageHandler(this.service.pageHandler);
             return this.service;
         }
 

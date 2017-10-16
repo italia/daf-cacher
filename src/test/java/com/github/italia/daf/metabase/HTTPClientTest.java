@@ -1,6 +1,8 @@
 package com.github.italia.daf.metabase;
 
 import com.github.italia.daf.service.ApiServiceTest;
+import com.github.italia.daf.util.Credential;
+import com.github.italia.daf.util.Token;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -29,8 +31,8 @@ public class HTTPClientTest {
 
     }
 
-    private HTTPClient.Credential getCredential() {
-        return new HTTPClient.Credential(properties.getProperty("metabase.username"), properties.getProperty("metabase.password"));
+    private Credential getCredential() {
+        return new Credential(properties.getProperty("metabase.username"), properties.getProperty("metabase.password"));
     }
 
     @Before
@@ -51,7 +53,7 @@ public class HTTPClientTest {
     @Test
     public void testLogin() throws Exception {
         HTTPClient client = new HTTPClient(new URL("http://localhost:3000/api"), getCredential());
-        HTTPClient.Token token = client.authenticate();
+        Token token = client.authenticate();
         assertTrue(!token.getId().isEmpty());
         assertTrue(client.isAuthenticated());
     }
