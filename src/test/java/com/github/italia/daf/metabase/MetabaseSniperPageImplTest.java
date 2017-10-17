@@ -3,8 +3,6 @@ package com.github.italia.daf.metabase;
 import com.github.italia.daf.dafapi.HTTPClient;
 import com.github.italia.daf.selenium.Browser;
 import com.github.italia.daf.service.ApiServiceTest;
-import com.github.italia.daf.superset.SupersetSniperPageImpl;
-import com.github.italia.daf.utils.Credential;
 import com.github.italia.daf.utils.IntegrationTestDataProvider;
 import org.junit.*;
 import org.openqa.selenium.By;
@@ -17,7 +15,7 @@ import java.net.URL;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 public class MetabaseSniperPageImplTest {
     final static Properties properties = new Properties();
@@ -25,6 +23,7 @@ public class MetabaseSniperPageImplTest {
 
     private MetabaseSniperPageImpl metabaseSniperPage;
     private IntegrationTestDataProvider provider;
+
     static {
         try (InputStream stream = ApiServiceTest
                 .class
@@ -74,7 +73,7 @@ public class MetabaseSniperPageImplTest {
 
         assertTrue(webDriver.findElement(By.name("downarrow")).isDisplayed());
 
-        final  byte[] buff = metabaseSniperPage.saveAsImage(webDriver);
+        final byte[] buff = metabaseSniperPage.saveAsImage(webDriver);
         assertTrue(buff.length > 0);
     }
 

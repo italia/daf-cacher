@@ -1,11 +1,8 @@
 package com.github.italia.daf.utils;
 
-import com.github.italia.daf.dafapi.HTTPClient;
 import com.google.gson.GsonBuilder;
 import spark.Spark;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
 import static spark.Spark.*;

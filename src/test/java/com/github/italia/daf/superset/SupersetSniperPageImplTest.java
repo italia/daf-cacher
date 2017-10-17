@@ -4,9 +4,7 @@ import com.github.italia.daf.dafapi.HTTPClient;
 import com.github.italia.daf.selenium.Browser;
 import com.github.italia.daf.service.ApiServiceTest;
 import com.github.italia.daf.utils.Credential;
-import com.github.italia.daf.utils.DafApiMock;
 import com.github.italia.daf.utils.IntegrationTestDataProvider;
-import com.github.italia.daf.utils.RandomDataProvider;
 import org.junit.*;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -15,17 +13,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 public class SupersetSniperPageImplTest {
     final static Properties properties = new Properties();
     static WebDriver webDriver;
     private SupersetSniperPageImpl supersetSniperPage;
     private IntegrationTestDataProvider provider;
+
     static {
         try (InputStream stream = ApiServiceTest
                 .class
@@ -84,7 +82,7 @@ public class SupersetSniperPageImplTest {
 
         assertTrue(webDriver.findElement(By.id("viewport")) != null);
 
-        final  byte[] buff = supersetSniperPage.saveAsImage(webDriver);
+        final byte[] buff = supersetSniperPage.saveAsImage(webDriver);
         assertTrue(buff.length > 0);
     }
 

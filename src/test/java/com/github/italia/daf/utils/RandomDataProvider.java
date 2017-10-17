@@ -5,7 +5,7 @@ import com.github.italia.daf.dafapi.HTTPClient;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RandomDataProvider implements DataProvider{
+public class RandomDataProvider implements DataProvider {
     private List<HTTPClient.EmbeddableData> fakeList;
 
     public RandomDataProvider() {

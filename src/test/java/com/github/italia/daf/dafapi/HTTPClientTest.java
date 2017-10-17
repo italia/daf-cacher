@@ -2,9 +2,9 @@ package com.github.italia.daf.dafapi;
 
 import com.github.italia.daf.service.ApiServiceTest;
 import com.github.italia.daf.utils.Credential;
+import com.github.italia.daf.utils.DafApiMock;
 import com.github.italia.daf.utils.RandomDataProvider;
 import com.github.italia.daf.utils.Token;
-import com.github.italia.daf.utils.DafApiMock;
 import org.junit.*;
 
 import java.io.IOException;
