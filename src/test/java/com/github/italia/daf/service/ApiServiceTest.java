@@ -1,6 +1,8 @@
 package com.github.italia.daf.service;
 
 import com.github.italia.daf.metabase.HTTPClient;
+import com.github.italia.daf.utils.DafApiMock;
+import com.github.italia.daf.utils.IntegrationTestDataProvider;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -20,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 public class ApiServiceTest {
     final static Properties properties = new Properties();
     static ApiService service;
+    static DafApiMock dafApiMock;
 
     static {
         try (InputStream stream = ApiServiceTest
@@ -32,6 +35,7 @@ public class ApiServiceTest {
         }
         try {
             service = new ApiService(properties);
+            dafApiMock = new DafApiMock(properties, new IntegrationTestDataProvider());
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
@@ -40,11 +44,13 @@ public class ApiServiceTest {
 
     @BeforeClass
     public static void startServer() {
+        dafApiMock.start();
         service.start();
     }
 
     @AfterClass
     public static void stopServer() {
+        dafApiMock.stop();
         service.stop();
     }
 

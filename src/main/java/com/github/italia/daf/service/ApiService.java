@@ -11,6 +11,7 @@ import org.openqa.selenium.WebDriver;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+import spark.Service;
 import spark.Spark;
 
 import java.net.MalformedURLException;
@@ -31,6 +32,7 @@ public class ApiService {
     private Properties properties;
     private ThreadLocalWebDriver localWebDriver;
     private JedisPool jedisPool;
+    private Service sparkService;
 
 
     public ApiService(final Properties properties) throws URISyntaxException {
@@ -40,22 +42,22 @@ public class ApiService {
     }
 
     public void start() {
-
-        staticFiles.location("/public");
+        sparkService = Service.ignite();
+        sparkService.staticFiles.location("/public");
         handlePlotList();
         handlePlot();
-        awaitInitialization();
+        sparkService.awaitInitialization();
     }
 
     public void stop() {
-        Spark.stop();
+        sparkService.stop();
         jedisPool.close();
         jedisPool.destroy();
 
     }
 
     private void handlePlot() {
-        get("/plot/:id/:geometry", (request, response) -> {
+        sparkService.get("/plot/:id/:geometry", (request, response) -> {
 
             String buffer;
             String geometry = request.params(":geometry");
@@ -109,7 +111,7 @@ public class ApiService {
     }
 
     private void handlePlotList() {
-        get("/plot/", (request, response) -> {
+        sparkService.get("/plot/", (request, response) -> {
 
             Credential credential = new Credential(
                     properties.getProperty("daf_api.user"),

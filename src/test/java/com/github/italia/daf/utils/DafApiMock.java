@@ -1,8 +1,12 @@
 package com.github.italia.daf.utils;
 
+import com.github.italia.daf.service.ApiServiceTest;
 import com.google.gson.GsonBuilder;
+import spark.Service;
 import spark.Spark;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 import static spark.Spark.*;
@@ -10,6 +14,7 @@ import static spark.Spark.*;
 public class DafApiMock {
     private Properties properties;
     private DataProvider dataProvider;
+    private Service sparkService;
 
     public DafApiMock(final Properties properties, DataProvider dataProvider) {
         this.properties = properties;
@@ -17,21 +22,22 @@ public class DafApiMock {
     }
 
     public void start() {
-        port(6767);
+        sparkService = Service.ignite();
+        sparkService.port(6767);
         handleLogin();
         handleDataList();
-        awaitInitialization();
+        sparkService.awaitInitialization();
     }
 
     public void stop() {
-        Spark.stop();
+        sparkService.stop();
     }
 
     private void handleLogin() {
 
-        get("/security-manager/v1/token", ((request, response) -> {
+        sparkService.get("/security-manager/v1/token", ((request, response) -> {
             if (request.headers("Authorization") == null) {
-                halt(403, "Request denied");
+                sparkService.halt(403, "Request denied");
             }
             return "\"AAAAAAAAAA\"";
         }));
@@ -39,14 +45,31 @@ public class DafApiMock {
 
     private void handleDataList() {
 
-        get("/dati-gov/v1/dashboard/iframes", ((request, response) -> {
+        sparkService.get("/dati-gov/v1/dashboard/iframes", ((request, response) -> {
             if (request.headers("Authorization") == null) {
-                halt(403, "Request denied");
+                sparkService.halt(403, "Request denied");
             }
             response.type("application/json");
             return new GsonBuilder()
                     .create()
                     .toJson(this.dataProvider.getList());
         }));
+    }
+
+    public static void main(String[] args) {
+        Properties properties = new Properties();
+        try (InputStream stream = ApiServiceTest
+                .class
+                .getClassLoader()
+                .getResourceAsStream("config-test.properties")) {
+
+            properties.load(stream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        final DafApiMock mock = new DafApiMock(properties, new IntegrationTestDataProvider());
+        mock.start();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(mock::stop));
     }
 }
