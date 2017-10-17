@@ -1,9 +1,9 @@
 package com.github.italia.daf;
 
 import com.github.italia.daf.dafapi.HTTPClient;
-import com.github.italia.daf.util.Configuration;
-import com.github.italia.daf.util.Credential;
-import com.github.italia.daf.util.LoggerFactory;
+import com.github.italia.daf.utils.Configuration;
+import com.github.italia.daf.utils.Credential;
+import com.github.italia.daf.utils.LoggerFactory;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import redis.clients.jedis.Jedis;

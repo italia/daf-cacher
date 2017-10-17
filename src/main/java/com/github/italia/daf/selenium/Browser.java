@@ -44,7 +44,7 @@ public class Browser {
         public Builder chrome() {
             this.browserCaps = DesiredCapabilities.chrome();
             ChromeOptions options = new ChromeOptions();
-            options.addArguments("'--start-maximized", "--window-size=1360,1020", "--headless");
+            options.addArguments("'--start-maximized", "--window-size=1360,1020");
             this.browserCaps.setCapability(ChromeOptions.CAPABILITY, options);
             return this;
         }

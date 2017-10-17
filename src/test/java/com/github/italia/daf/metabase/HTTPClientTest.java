@@ -1,8 +1,8 @@
 package com.github.italia.daf.metabase;
 
 import com.github.italia.daf.service.ApiServiceTest;
-import com.github.italia.daf.util.Credential;
-import com.github.italia.daf.util.Token;
+import com.github.italia.daf.utils.Credential;
+import com.github.italia.daf.utils.Token;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;

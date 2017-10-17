@@ -5,8 +5,8 @@ import com.github.italia.daf.selenium.Browser;
 import com.github.italia.daf.sniper.Page;
 import com.github.italia.daf.sniper.PageSniper;
 import com.github.italia.daf.superset.SupersetSniperPageImpl;
-import com.github.italia.daf.util.Configuration;
-import com.github.italia.daf.util.Credential;
+import com.github.italia.daf.utils.Configuration;
+import com.github.italia.daf.utils.Credential;
 import org.apache.commons.io.IOUtils;
 import org.openqa.selenium.WebDriver;
 

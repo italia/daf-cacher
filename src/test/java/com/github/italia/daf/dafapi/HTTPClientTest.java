@@ -1,8 +1,9 @@
 package com.github.italia.daf.dafapi;
 
 import com.github.italia.daf.service.ApiServiceTest;
-import com.github.italia.daf.util.Credential;
-import com.github.italia.daf.util.Token;
+import com.github.italia.daf.utils.Credential;
+import com.github.italia.daf.utils.RandomDataProvider;
+import com.github.italia.daf.utils.Token;
 import com.github.italia.daf.utils.DafApiMock;
 import org.junit.*;
 
@@ -24,7 +25,7 @@ public class HTTPClientTest {
                 .getClassLoader()
                 .getResourceAsStream("config-test.properties")) {
             properties.load(stream);
-            dafApiMock = new DafApiMock(properties);
+            dafApiMock = new DafApiMock(properties, new RandomDataProvider());
         } catch (IOException e) {
             e.printStackTrace();
         }

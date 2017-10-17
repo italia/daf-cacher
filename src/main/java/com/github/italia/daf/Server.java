@@ -1,7 +1,7 @@
 package com.github.italia.daf;
 
 import com.github.italia.daf.service.ApiService;
-import com.github.italia.daf.util.Configuration;
+import com.github.italia.daf.utils.Configuration;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

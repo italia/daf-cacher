@@ -2,9 +2,9 @@ package com.github.italia.daf.service;
 
 import com.github.italia.daf.sniper.Page;
 import com.github.italia.daf.sniper.PageSniper;
-import com.github.italia.daf.util.Geometry;
-import com.github.italia.daf.util.LoggerFactory;
-import com.github.italia.daf.util.Resize;
+import com.github.italia.daf.utils.Geometry;
+import com.github.italia.daf.utils.LoggerFactory;
+import com.github.italia.daf.utils.Resize;
 import org.openqa.selenium.WebDriver;
 import redis.clients.jedis.Jedis;
 

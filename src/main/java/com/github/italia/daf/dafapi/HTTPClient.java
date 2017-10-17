@@ -1,7 +1,7 @@
 package com.github.italia.daf.dafapi;
 
-import com.github.italia.daf.util.Credential;
-import com.github.italia.daf.util.Token;
+import com.github.italia.daf.utils.Credential;
+import com.github.italia.daf.utils.Token;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

@@ -12,21 +12,11 @@ import static spark.Spark.*;
 
 public class DafApiMock {
     private Properties properties;
-    private List<HTTPClient.EmbeddableData> fakeList;
+    private DataProvider dataProvider;
 
-    public DafApiMock(final Properties properties) {
+    public DafApiMock(final Properties properties, DataProvider dataProvider) {
         this.properties = properties;
-        this.fakeList = new ArrayList<>();
-
-        for (int i = 0; i < 5; i++) {
-            final HTTPClient.EmbeddableData d = new HTTPClient.EmbeddableData();
-            d.setIdentifier("identifier_" + i);
-            d.setOrigin(i % 2 == 0 ? "metabase" : "superset");
-            d.setTitle("title_" + i);
-            d.setIframeUrl("//iframe_url/" + i);
-            this.fakeList.add(d);
-
-        }
+        this.dataProvider = dataProvider;
     }
 
     public void start() {
@@ -59,7 +49,7 @@ public class DafApiMock {
             response.type("application/json");
             return new GsonBuilder()
                     .create()
-                    .toJson(this.fakeList);
+                    .toJson(this.dataProvider.getList());
         }));
     }
 }

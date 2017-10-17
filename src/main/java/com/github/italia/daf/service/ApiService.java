@@ -1,10 +1,10 @@
 package com.github.italia.daf.service;
 
 import com.github.italia.daf.selenium.Browser;
-import com.github.italia.daf.util.Credential;
-import com.github.italia.daf.util.Geometry;
-import com.github.italia.daf.util.LoggerFactory;
-import com.github.italia.daf.util.Resize;
+import com.github.italia.daf.utils.Credential;
+import com.github.italia.daf.utils.Geometry;
+import com.github.italia.daf.utils.LoggerFactory;
+import com.github.italia.daf.utils.Resize;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.openqa.selenium.WebDriver;

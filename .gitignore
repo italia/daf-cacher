@@ -5,3 +5,4 @@ target/
 .envrc
 config.properties
 config-docker.properties
+__pycache__

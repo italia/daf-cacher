@@ -1,7 +1,7 @@
 package com.github.italia.daf.superset;
 
 import com.github.italia.daf.sniper.Page;
-import com.github.italia.daf.util.Credential;
+import com.github.italia.daf.utils.Credential;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
