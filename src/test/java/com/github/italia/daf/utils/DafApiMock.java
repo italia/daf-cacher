@@ -3,13 +3,10 @@ package com.github.italia.daf.utils;
 import com.github.italia.daf.service.ApiServiceTest;
 import com.google.gson.GsonBuilder;
 import spark.Service;
-import spark.Spark;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-
-import static spark.Spark.*;
 
 public class DafApiMock {
     private Properties properties;

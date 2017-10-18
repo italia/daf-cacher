@@ -1,6 +1,10 @@
 package com.github.italia.daf.service;
 
+import com.github.italia.daf.dafapi.HTTPClient;
+import com.github.italia.daf.metabase.MetabaseSniperPageImpl;
 import com.github.italia.daf.selenium.Browser;
+import com.github.italia.daf.sniper.Page;
+import com.github.italia.daf.superset.SupersetSniperPageImpl;
 import com.github.italia.daf.utils.Credential;
 import com.github.italia.daf.utils.Geometry;
 import com.github.italia.daf.utils.LoggerFactory;
@@ -12,19 +16,21 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import spark.Service;
-import spark.Spark;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Base64;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static spark.Spark.*;
+import static com.github.italia.daf.service.ScreenShotService.REDIS_NS;
 
 public class ApiService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApiService.class.getName());
@@ -33,12 +39,24 @@ public class ApiService {
     private ThreadLocalWebDriver localWebDriver;
     private JedisPool jedisPool;
     private Service sparkService;
+    private Credential supersetCredential;
+    private Credential dafApiCredential;
 
 
     public ApiService(final Properties properties) throws URISyntaxException {
         this.properties = properties;
         this.localWebDriver = new ThreadLocalWebDriver();
         this.jedisPool = new JedisPool(new JedisPoolConfig(), new URI(properties.getProperty("caching.redis_host")));
+        this.supersetCredential = new Credential(
+                properties.getProperty("superset.user"),
+                properties.getProperty("superset.password")
+        );
+
+        this.dafApiCredential = new Credential(
+                properties.getProperty("daf_api.user"),
+                properties.getProperty("daf_api.password")
+        );
+
     }
 
     public void start() {
@@ -73,7 +91,7 @@ public class ApiService {
             }
 
             try (Jedis jedis = jedisPool.getResource()) {
-                String key = "daf-cacher:keys:" + request.params(":id") + ":" + geometry;
+                String key = REDIS_NS + request.params(":id") + ":" + geometry;
                 buffer = jedis.get(key);
             }
 
@@ -87,20 +105,19 @@ public class ApiService {
             // Cache miss. Let's see if an original size is available
             try (Jedis jedis = jedisPool.getResource()) {
 
-                String key = "daf-cacher:keys:" + request.params(":id") + ":" + ORIGINAL_SIZE;
+                String key = REDIS_NS + request.params(":id") + ":" + ORIGINAL_SIZE;
                 buffer = jedis.get(key);
 
                 // Cache is completely empty for this plot let's take a fresh snap
                 if (buffer == null || buffer.length() == 0) {
-                    response.status(404);
-                    return null;
+                    decoded = handleNewSnap(request.params(":id"), ORIGINAL_SIZE);
                 } else {
                     decoded = Base64.getDecoder().decode(buffer);
                 }
             }
 
             // A new size requested?
-            if (!geometry.equals("original")) {
+            if (!geometry.equals(ORIGINAL_SIZE)) {
                 decoded = new Resize(decoded)
                         .to(Geometry.fromString(geometry));
             }
@@ -112,18 +129,70 @@ public class ApiService {
 
     private void handlePlotList() {
         sparkService.get("/plot/", (request, response) -> {
-
-            Credential credential = new Credential(
-                    properties.getProperty("daf_api.user"),
-                    properties.getProperty("daf_api.password")
-            );
-
-            final com.github.italia.daf.dafapi.HTTPClient client = new com.github.italia.daf.dafapi.HTTPClient(new URL(properties.getProperty("daf_api.host")), credential);
-            client.authenticate();
             final Gson gson = new GsonBuilder().create();
             response.type("application/json");
-            return gson.toJson(client.getEmbeddableDataList());
+            return gson.toJson(getAvailablePlotList());
         });
+    }
+
+    private byte[] handleNewSnap(final String id, final String size) throws IOException, TimeoutException {
+
+        final HTTPClient.EmbeddableData data = getAvailablePlotList()
+                .stream()
+                .filter(x -> x.getIdentifier().equals(id))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("The request " + id + " is not available"));
+
+        try (Jedis jedis = jedisPool.getResource()) {
+            final Page pageHandler = fromId(id);
+            final ScreenShotService.Builder builder = new ScreenShotService
+                    .Builder()
+                    .setPageHandler(pageHandler)
+                    .jedis(jedis)
+                    .id(id)
+                    .webDriver(localWebDriver.get())
+                    .plotUrl(new URL(data.getIframeUrl()))
+                    .ttl(Integer.parseInt(properties.getProperty("caching.ttl")))
+                    .timeout(20);
+
+            if (!size.equals(ORIGINAL_SIZE))
+                builder.geometry(Geometry.fromString(size));
+
+            final ScreenShotService service = builder.build();
+            service.perform();
+            return service.fetch(id, size);
+        } finally {
+            localWebDriver.remove();
+        }
+
+    }
+
+    private Page fromId(final String id) {
+
+        if (id.startsWith("metabase_")) {
+            return new MetabaseSniperPageImpl();
+        }
+
+        if (id.startsWith("superset_")) {
+            try {
+                return new SupersetSniperPageImpl
+                        .Builder()
+                        .setCredential(supersetCredential)
+                        .setSupersetLoginUrl(new URL(properties.getProperty("superset.login_url")))
+                        .getSniperPage();
+            } catch (MalformedURLException e) {
+                /* ignored */
+            }
+        }
+
+        throw new IllegalArgumentException("ID " + id + " not handled");
+    }
+
+    private List<HTTPClient.EmbeddableData> getAvailablePlotList() throws IOException {
+        final HTTPClient client = new HTTPClient(new URL(properties.getProperty("daf_api.host")), dafApiCredential);
+        client.authenticate();
+        return client.getEmbeddableDataList();
+
     }
 
     private final class ThreadLocalWebDriver extends ThreadLocal<WebDriver> {

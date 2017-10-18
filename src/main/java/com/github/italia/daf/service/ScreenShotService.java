@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 public class ScreenShotService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ScreenShotService.class.getName());
-    private static final String REDIS_NS = "daf-cacher:keys:";
+    public static final String REDIS_NS = "daf-cacher:keys:";
     private Jedis jedis;
     private WebDriver webDriver;
     private URL url;

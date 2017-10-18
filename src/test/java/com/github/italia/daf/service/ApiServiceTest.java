@@ -79,7 +79,7 @@ public class ApiServiceTest {
 
     @Test
     public void testPlot() throws IOException {
-        final String plotId = "d68c6cae-0494-452a-871d-822e345c3981";
+        final String plotId = "metabase_d68c6cae-0494-452a-871d-822e345c3981";
         final HttpResponse response = Request.Get("http://localhost:4567/plot/" + plotId + "/original")
                 .execute()
                 .returnResponse();
@@ -89,7 +89,7 @@ public class ApiServiceTest {
 
     @Test
     public void testPlotResize() throws IOException {
-        final String plotId = "d68c6cae-0494-452a-871d-822e345c3981";
+        final String plotId = "metabase_d68c6cae-0494-452a-871d-822e345c3981";
         final HttpResponse response = Request.Get("http://localhost:4567/plot/" + plotId + "/200x200")
                 .execute()
                 .returnResponse();
