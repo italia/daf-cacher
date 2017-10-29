@@ -1,6 +1,6 @@
 package com.github.italia.daf.superset;
 
-import com.github.italia.daf.dafapi.HTTPClient;
+import com.github.italia.daf.data.EmbeddableData;
 import com.github.italia.daf.selenium.Browser;
 import com.github.italia.daf.service.ApiServiceTest;
 import com.github.italia.daf.utils.Credential;
@@ -73,7 +73,7 @@ public class SupersetSniperPageImplTest {
 
     @Test
     public void visit() throws Exception {
-        final HTTPClient.EmbeddableData d = provider.getList()
+        final EmbeddableData d = provider.getList()
                 .stream()
                 .filter(x -> x.getOrigin().equals("superset"))
                 .findFirst()

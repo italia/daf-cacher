@@ -16,6 +16,7 @@ import java.util.Properties;
 
 import static org.junit.Assert.assertTrue;
 
+@SuppressWarnings("squid:S1607")
 public class HTTPClientTest {
     final static Properties properties = new Properties();
 

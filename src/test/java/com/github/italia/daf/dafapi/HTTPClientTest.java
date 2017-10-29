@@ -58,7 +58,7 @@ public class HTTPClientTest {
     @Test
     public void testDataList() throws Exception {
         client.authenticate();
-        assertTrue(client.getEmbeddableDataList().size() > 0);
+        assertTrue(client.getList().size() > 0);
 
     }
 

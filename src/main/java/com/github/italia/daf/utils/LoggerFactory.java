@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
+@SuppressWarnings("squid:S1148")
 public class LoggerFactory {
     static {
         try (InputStream stream = LoggerFactory.class.getClassLoader().getResourceAsStream("logging.properties")) {

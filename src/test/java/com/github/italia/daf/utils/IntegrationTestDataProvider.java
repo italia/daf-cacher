@@ -1,6 +1,7 @@
 package com.github.italia.daf.utils;
 
-import com.github.italia.daf.dafapi.HTTPClient;
+import com.github.italia.daf.data.DataProvider;
+import com.github.italia.daf.data.EmbeddableData;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.io.IOUtils;
@@ -11,7 +12,7 @@ import java.util.List;
 
 public class IntegrationTestDataProvider implements DataProvider {
 
-    private List<HTTPClient.EmbeddableData> list;
+    private List<EmbeddableData> list;
 
     public IntegrationTestDataProvider() {
         this.list = new ArrayList<>();
@@ -19,7 +20,7 @@ public class IntegrationTestDataProvider implements DataProvider {
         ClassLoader classLoader = getClass().getClassLoader();
         try {
             String result = IOUtils.toString(classLoader.getResourceAsStream("integration-data.json"), "UTF-8");
-            this.list = new GsonBuilder().create().fromJson(result, new TypeToken<List<HTTPClient.EmbeddableData>>() {
+            this.list = new GsonBuilder().create().fromJson(result, new TypeToken<List<EmbeddableData>>() {
             }.getType());
         } catch (IOException e) {
             /* ignored */
@@ -27,7 +28,7 @@ public class IntegrationTestDataProvider implements DataProvider {
     }
 
     @Override
-    public List<HTTPClient.EmbeddableData> getList() {
+    public List<EmbeddableData> getList() {
         return list;
     }
 }

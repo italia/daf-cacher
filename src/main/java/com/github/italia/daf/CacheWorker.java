@@ -1,6 +1,6 @@
 package com.github.italia.daf;
 
-import com.github.italia.daf.dafapi.HTTPClient;
+import com.github.italia.daf.data.EmbeddableData;
 import com.github.italia.daf.metabase.MetabaseSniperPageImpl;
 import com.github.italia.daf.selenium.Browser;
 import com.github.italia.daf.service.ScreenShotService;
@@ -27,6 +27,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@SuppressWarnings("squid:S135")
 public class CacheWorker {
     private static final Logger LOGGER = LoggerFactory.getLogger(CacheWorker.class.getName());
 
@@ -76,7 +77,7 @@ public class CacheWorker {
                     break;
                 }
 
-                HTTPClient.EmbeddableData embeddableData = gson.fromJson(embedPayload, HTTPClient.EmbeddableData.class);
+                EmbeddableData embeddableData = gson.fromJson(embedPayload, EmbeddableData.class);
 
 
                 LOGGER.log(Level.INFO, () -> "Processing url " + embeddableData.getIframeUrl() + "[origin=" + embeddableData.getOrigin() + "]");

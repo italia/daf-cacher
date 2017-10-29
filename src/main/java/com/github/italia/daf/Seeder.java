@@ -1,6 +1,7 @@
 package com.github.italia.daf;
 
 import com.github.italia.daf.dafapi.HTTPClient;
+import com.github.italia.daf.data.EmbeddableData;
 import com.github.italia.daf.utils.Configuration;
 import com.github.italia.daf.utils.Credential;
 import com.github.italia.daf.utils.LoggerFactory;
@@ -41,7 +42,7 @@ public class Seeder {
                     final Gson gson = new GsonBuilder().create();
                     try {
                         client.authenticate();
-                        for (final HTTPClient.EmbeddableData embeddableData : client.getEmbeddableDataList()) {
+                        for (final EmbeddableData embeddableData : client.getList()) {
                             LOGGER.info("Card id " + embeddableData.getIdentifier() + " [" + embeddableData.getOrigin() + "] enqueued for caching");
                             jedis.lpush("daf-cacher:jobs", gson.toJson(embeddableData));
                         }

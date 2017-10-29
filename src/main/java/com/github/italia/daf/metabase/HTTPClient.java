@@ -65,7 +65,7 @@ public class HTTPClient {
                 .execute().returnContent();
     }
 
-
+    @SuppressWarnings("squid:S00117")
     public static class Card {
         private int id;
         @SerializedName("public_uuid")

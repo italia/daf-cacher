@@ -1,11 +1,12 @@
 package com.github.italia.daf.dafapi;
 
+import com.github.italia.daf.data.DataProvider;
+import com.github.italia.daf.data.EmbeddableData;
 import com.github.italia.daf.utils.Credential;
 import com.github.italia.daf.utils.Token;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.annotations.SerializedName;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.fluent.Request;
@@ -15,7 +16,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.List;
 
-public class HTTPClient {
+public class HTTPClient implements DataProvider{
     private URL apiHost;
     private Token token;
     private String authHeader;
@@ -38,8 +39,8 @@ public class HTTPClient {
         return token;
     }
 
-    public List<EmbeddableData> getEmbeddableDataList() throws IOException {
-
+    @Override
+    public List<EmbeddableData> getList() throws IOException{
         if (this.token == null)
             throw new IllegalArgumentException("Client not authenticated");
 
@@ -54,48 +55,5 @@ public class HTTPClient {
                 new TypeToken<List<EmbeddableData>>() {
                 }.getType()
         );
-
-
     }
-
-    public static class EmbeddableData {
-        @SerializedName("iframe_url")
-        private String iframeUrl;
-        private String origin;
-        private String title;
-        private String identifier;
-
-        public String getIframeUrl() {
-            return iframeUrl;
-        }
-
-        public void setIframeUrl(String iframeUrl) {
-            this.iframeUrl = iframeUrl;
-        }
-
-        public String getOrigin() {
-            return origin;
-        }
-
-        public void setOrigin(String origin) {
-            this.origin = origin;
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        public void setTitle(String title) {
-            this.title = title;
-        }
-
-        public String getIdentifier() {
-            return identifier;
-        }
-
-        public void setIdentifier(String identifier) {
-            this.identifier = identifier;
-        }
-    }
-
 }

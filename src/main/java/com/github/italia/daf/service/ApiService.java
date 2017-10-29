@@ -1,6 +1,7 @@
 package com.github.italia.daf.service;
 
 import com.github.italia.daf.dafapi.HTTPClient;
+import com.github.italia.daf.data.EmbeddableData;
 import com.github.italia.daf.metabase.MetabaseSniperPageImpl;
 import com.github.italia.daf.selenium.Browser;
 import com.github.italia.daf.sniper.Page;
@@ -140,7 +141,7 @@ public class ApiService {
 
     private byte[] handleNewSnap(final String id, final String size) throws IOException, TimeoutException {
 
-        final HTTPClient.EmbeddableData data = getAvailablePlotList()
+        final EmbeddableData data = getAvailablePlotList()
                 .stream()
                 .filter(x -> x.getIdentifier().equals(id))
                 .findFirst()
@@ -195,7 +196,7 @@ public class ApiService {
         throw new IllegalArgumentException("ID " + id + " not handled");
     }
 
-    private List<HTTPClient.EmbeddableData> getAvailablePlotList() throws IOException {
+    private List<EmbeddableData> getAvailablePlotList() throws IOException {
         try (Jedis jedis = jedisPool.getResource()) {
 
             final String cachedPayload = jedis.get(REDIS_NS + "available-list");
@@ -203,7 +204,7 @@ public class ApiService {
             if (cachedPayload == null) {
                 final HTTPClient client = new HTTPClient(new URL(properties.getProperty("daf_api.host")), dafApiCredential);
                 client.authenticate();
-                final List<HTTPClient.EmbeddableData> dataList = client.getEmbeddableDataList();
+                final List<EmbeddableData> dataList = client.getList();
                 jedis.setex(
                         REDIS_NS + "available-list",
                         Integer.parseInt(properties.getProperty("caching.ttl")),
@@ -211,7 +212,7 @@ public class ApiService {
                 );
                 return dataList;
             } else {
-                return new GsonBuilder().create().fromJson(cachedPayload, new TypeToken<List<HTTPClient.EmbeddableData>>() {
+                return new GsonBuilder().create().fromJson(cachedPayload, new TypeToken<List<EmbeddableData>>() {
                 }.getType());
             }
         }
