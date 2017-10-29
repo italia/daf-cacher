@@ -1,22 +1,21 @@
-# Metabase config section
-# NO TRAILING SLASH
-metabase.api_endpoint=https://graph.daf.teamdigitale.it/api
-metabase.host=https://graph.daf.teamdigitale.it
-metabase.api_token=xxxxxxx-xxxxx-xxxxx-xxxx
-metabase.username=user@host.com
-metabase.password=xxxxxx
+# daf api config
+daf_api.host=https://api.daf.teamdigitale.it
+daf_api.user=dafuser
+daf_api.password=dafpassword
+
+# Superset config
+superset.login_url=https://bi.daf.teamdigitale.it/login/
+superset.user=supersetuser
+superset.password=supersetpassword
 
 # Plot caching config section
-
 caching.selenium_hub=http://selenium:4444/wd/hub
-
 # Expire after X minutes
-caching.ttl=10
+caching.ttl=60
 # Redis used as caching and message queue
 caching.redis_host=redis://redis:6379/2
-# Refresh data from metabase API every X minutes.
-# To cache missing, this value should be half of caching.ttl value
-caching.refresh_every=5
-
+# Refresh data from daf API every X minutes.
+# To avoid cache missing, keep this value lower than caching.ttl
+caching.refresh_every=30
 # A space separated geometry representation of pre-cached thumbs size
-caching.geometries=100x100 400x300 280x500
+caching.geometries=100x100 400x300 280x500 356x280

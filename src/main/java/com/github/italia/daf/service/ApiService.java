@@ -9,6 +9,7 @@ import com.github.italia.daf.utils.Credential;
 import com.github.italia.daf.utils.Geometry;
 import com.github.italia.daf.utils.LoggerFactory;
 import com.github.italia.daf.utils.Resize;
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.openqa.selenium.WebDriver;
@@ -36,7 +37,7 @@ public class ApiService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApiService.class.getName());
     private static final String ORIGINAL_SIZE = "original";
     private Properties properties;
-    private ThreadLocalWebDriver localWebDriver;
+
     private JedisPool jedisPool;
     private Service sparkService;
     private Credential supersetCredential;
@@ -45,7 +46,7 @@ public class ApiService {
 
     public ApiService(final Properties properties) throws URISyntaxException {
         this.properties = properties;
-        this.localWebDriver = new ThreadLocalWebDriver();
+
         this.jedisPool = new JedisPool(new JedisPoolConfig(), new URI(properties.getProperty("caching.redis_host")));
         this.supersetCredential = new Credential(
                 properties.getProperty("superset.user"),
@@ -60,7 +61,9 @@ public class ApiService {
     }
 
     public void start() {
-        sparkService = Service.ignite();
+        sparkService = Service
+                .ignite()
+                .threadPool(32, 2, 30000);
         sparkService.staticFiles.location("/public");
         handlePlotList();
         handlePlot();
@@ -142,15 +145,16 @@ public class ApiService {
                 .filter(x -> x.getIdentifier().equals(id))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("The request " + id + " is not available"));
-
+        final WebDriver webDriver = webDriver();
         try (Jedis jedis = jedisPool.getResource()) {
             final Page pageHandler = fromId(id);
+
             final ScreenShotService.Builder builder = new ScreenShotService
                     .Builder()
                     .setPageHandler(pageHandler)
                     .jedis(jedis)
                     .id(id)
-                    .webDriver(localWebDriver.get())
+                    .webDriver(webDriver)
                     .plotUrl(new URL(data.getIframeUrl()))
                     .ttl(Integer.parseInt(properties.getProperty("caching.ttl")))
                     .timeout(20);
@@ -162,7 +166,10 @@ public class ApiService {
             service.perform();
             return service.fetch(id, size);
         } finally {
-            localWebDriver.remove();
+            if (webDriver != null) {
+                webDriver.close();
+                webDriver.quit();
+            }
         }
 
     }
@@ -189,44 +196,41 @@ public class ApiService {
     }
 
     private List<HTTPClient.EmbeddableData> getAvailablePlotList() throws IOException {
-        final HTTPClient client = new HTTPClient(new URL(properties.getProperty("daf_api.host")), dafApiCredential);
-        client.authenticate();
-        return client.getEmbeddableDataList();
+        try (Jedis jedis = jedisPool.getResource()) {
+
+            final String cachedPayload = jedis.get(REDIS_NS + "available-list");
+
+            if (cachedPayload == null) {
+                final HTTPClient client = new HTTPClient(new URL(properties.getProperty("daf_api.host")), dafApiCredential);
+                client.authenticate();
+                final List<HTTPClient.EmbeddableData> dataList = client.getEmbeddableDataList();
+                jedis.setex(
+                        REDIS_NS + "available-list",
+                        Integer.parseInt(properties.getProperty("caching.ttl")),
+                        new GsonBuilder().create().toJson(dataList)
+                );
+                return dataList;
+            } else {
+                return new GsonBuilder().create().fromJson(cachedPayload, new TypeToken<List<HTTPClient.EmbeddableData>>() {
+                }.getType());
+            }
+        }
 
     }
 
-    private final class ThreadLocalWebDriver extends ThreadLocal<WebDriver> {
+    private WebDriver webDriver() {
+        try {
+            WebDriver webDriver = new Browser
+                    .Builder(new URL(properties.getProperty("caching.selenium_hub")))
+                    .chrome()
+                    .build()
+                    .webDriver();
+            webDriver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
+            return webDriver;
+        } catch (MalformedURLException e) {
+            LOGGER.log(Level.SEVERE, "an exception was thrown", e);
 
-        @Override
-        protected WebDriver initialValue() {
-            final WebDriver webDriver;
-            try {
-                webDriver = new Browser
-                        .Builder(new URL(properties.getProperty("caching.selenium_hub")))
-                        .chrome()
-                        .build()
-                        .webDriver();
-                webDriver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
-                return webDriver;
-            } catch (MalformedURLException e) {
-                LOGGER.log(Level.SEVERE, "an exception was thrown", e);
-
-            }
-            return null;
         }
-
-        @Override
-        public void remove() {
-            WebDriver driver = get();
-            if (driver != null)
-                driver.close();
-            super.remove();
-        }
-
-        @Override
-        public void set(WebDriver value) {
-            throw new UnsupportedOperationException();
-        }
-
+        return null;
     }
 }

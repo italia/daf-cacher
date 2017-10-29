@@ -1,6 +1,6 @@
 # daf-metabase-cacher
 
-A microservice to cache Metabase plots
+A microservice to cache DAF plots
 
 This microservice is used by [daf-dataportal](https://github.com/italia/daf-dataportal),
 iterates over the various plots, takes a screenshot, and caches them.
@@ -33,7 +33,7 @@ It is used to serve cached images to the client
 
 * Seeder
 
-A recurring task would go through each available public plot by pinging Metabase's API and it will enqueue a new caching job
+A recurring task would go through each available public plot by pinging DAF API and it will enqueue a new caching job
 
  
 * Worker
@@ -42,13 +42,8 @@ Responsible to perform screenshot and thumbs, consuming jobs enqueued by the See
 
 ## How to run locally with docker compose:
 
-* Make sure to have a valid https://graph.daf.teamdigitale.it account
-* Obtain your metabase token with the following command
-
-```
-$ curl -XPOST -H "Content-Type: application/json" -d  '{"username": "user@domain.com", "password": "xxxxx"}'   https://graph.daf.teamdigitale.it/api/session
-```
-
+* Make sure to have a valid https://bi.daf.teamdigitale.it account
+* Make sure to have a valid https://dataportal-private.daf.teamdigitale.it account
 * Make sure to have a jdk8 installed
 * Make sure to have a modern maven version installed
 * Copy ```config.properties.example``` to ```config-docker.properties``` and edit it accordingly
@@ -70,6 +65,5 @@ $ docker-compose up
 
 Once the service is up, a POC will be available at http://localhost:4567/
 
-Live demo available at https://daf-cache.taganaka.com/
 
 

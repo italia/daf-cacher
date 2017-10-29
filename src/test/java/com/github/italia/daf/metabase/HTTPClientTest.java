@@ -52,7 +52,7 @@ public class HTTPClientTest {
     @Ignore
     @Test
     public void testLogin() throws Exception {
-        HTTPClient client = new HTTPClient(new URL("http://localhost:3000/api"), getCredential());
+        HTTPClient client = new HTTPClient(new URL(properties.getProperty("metabase.api_endpoint")), getCredential());
         Token token = client.authenticate();
         assertTrue(!token.getId().isEmpty());
         assertTrue(client.isAuthenticated());
@@ -60,7 +60,7 @@ public class HTTPClientTest {
 
     @Test
     public void testGetCards() throws Exception {
-        HTTPClient client = new HTTPClient(new URL("http://localhost:3000/api"), getCredential());
+        HTTPClient client = new HTTPClient(new URL(properties.getProperty("metabase.api_endpoint")), getCredential());
         client.authenticate();
         final List<HTTPClient.Card> cards = client.getPublicCards();
         assertTrue(!cards.isEmpty());

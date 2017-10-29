@@ -15,8 +15,9 @@ services:
       - ./config-docker.properties:/etc/config.properties
     command: worker
     depends_on:
-      - "selenium"
+      - "chrome"
       - "redis"
+    restart: on-failure
 
   api:
     image: italia/daf-metabase-cacher
@@ -32,9 +33,24 @@ services:
     image: "redis:alpine"
 
   selenium:
-    image: "selenium/standalone-chrome:3.6.0-bromine"
+    image: selenium/hub
     ports:
-      - "5900:5900"
       - "4444:4444"
+    environment:
+      - GRID_MAX_SESSION=200
+      - GRID_BROWSER_TIMEOUT=100000
+      - GRID_TIMEOUT=90000
+      - GRID_NEW_SESSION_WAIT_TIMEOUT=300000
+
+
+  chrome:
+    image: selenium/node-chrome
+    links:
+      - selenium:selenium
     volumes:
-      - /dev/shm:/dev/shm
+      - /dev/shm:/dev/shm # Mitigates the Chromium issue described at https://code.google.com/p/chromium/issues/detail?id=519952
+    environment:
+      HUB_PORT_4444_TCP_ADDR: selenium
+      HUB_PORT_4444_TCP_PORT: 4444
+      NODE_MAX_INSTANCES: 60
+      NODE_MAX_SESSION: 60

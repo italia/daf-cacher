@@ -6,3 +6,6 @@ target/
 config.properties
 config-docker.properties
 __pycache__
+.classpath
+.project
+.settings
