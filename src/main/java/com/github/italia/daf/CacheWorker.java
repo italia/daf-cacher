@@ -20,6 +20,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
@@ -49,12 +50,10 @@ public class CacheWorker {
 
         try (final Jedis jedis = new Jedis(new URI(properties.getProperty("caching.redis_host")))) {
             final Gson gson = new GsonBuilder().create();
-
-
             final List<Geometry> sizes = new ArrayList<>();
-            for (final String token : properties.getProperty("caching.geometries").split("\\s+")) {
-                sizes.add(Geometry.fromString(token));
-            }
+            Arrays
+                    .stream(properties.getProperty("caching.geometries").split("\\s+"))
+                    .forEach(x -> sizes.add(Geometry.fromString(x)));
 
             final Page metabasePageHandler = new MetabaseSniperPageImpl();
             final Page supersetPageHandler = new SupersetSniperPageImpl
