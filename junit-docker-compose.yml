@@ -1,0 +1,39 @@
+version: '3'
+services:
+
+
+  metabase-junit:
+    image: metabase/metabase
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./metabase-data-test:/metabase-data
+    environment:
+      MB_DB_FILE: /metabase-data/metabase.db
+      MAX_SESSION_AGE: 13140000
+
+  superset-junit:
+    image: amancevice/superset
+    restart: always
+    depends_on:
+      - redis-junit
+    environment:
+      MAPBOX_API_KEY: ""
+      SUPERSET_HOME: /etc/superset
+    ports:
+      - "8088:8088"
+    volumes:
+      - ./superset-data-test:/etc/superset
+
+  redis-junit:
+    image: "redis:alpine"
+    ports:
+      - "6380:6379"
+
+  selenium-junit:
+    image: "selenium/standalone-chrome-debug:3.6.0-bromine"
+    ports:
+      - "5901:5900"
+      - "4445:4444"
+    volumes:
+      - /dev/shm:/dev/shm

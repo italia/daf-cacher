@@ -1,0 +1,5 @@
+superset-data-test/
+metabase-data-test/
+.idea/
+.project
+.classpath
