@@ -1,4 +1,4 @@
-# daf-metabase-cacher
+# daf-cacher
 
 A microservice to cache DAF plots
 
@@ -8,9 +8,10 @@ iterates over the various plots, takes a screenshot, and caches them.
 
 ## Build status
 
-[![Build Status](https://travis-ci.org/taganaka/daf-metabase-cacher.svg?branch=master)](https://travis-ci.org/taganaka/daf-metabase-cacher)
+[![Build Status](https://travis-ci.org/italia/daf-cacher.svg?branch=master)](https://travis-ci.org/italia/daf-cacher)
 
 ## Architecture
+
 ![daf cache architecture diagram](daf-cache.png "daf cache architecture diagram")
 
 
@@ -19,12 +20,14 @@ iterates over the various plots, takes a screenshot, and caches them.
 * Easy to scale thanks to producer/consumer architecture backed by redis 
 * It generates for each plot a customizable set of different thumbs size
 * Embedding cached image in the page is easy as
+
  ```html
 <img src="//proxy/plot/:plot_public_id/:geometry">
 ```
 Es:
+
 ```html
-<img src="/plot/cb638004-661c-4c11-802c-1fc1e2312577/356x280">
+<img src="//proxy/plot/cb638004-661c-4c11-802c-1fc1e2312577/356x280">
 ```
 
 * New public plots are discovered and cached automatically
