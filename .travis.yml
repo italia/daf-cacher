@@ -6,5 +6,6 @@ services:
 language: java
 
 before_script:
+  - tar xzvf test-artifacts.tgz -C ./
   - docker-compose -f junit-docker-compose.yml up -d
   - until curl --silent --fail localhost:3000/api/health >/dev/null; do sleep 1; done

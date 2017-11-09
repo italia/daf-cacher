@@ -9,3 +9,5 @@ __pycache__
 .classpath
 .project
 .settings
+metabase-data-test/
+superset-data-test/
