@@ -177,7 +177,7 @@ public class ApiService {
 
     private Page fromId(final String id) {
 
-        if (id.startsWith("metabase_")) {
+        if (id.startsWith("metabase_") || id.startsWith("tdmetabase_")) {
             return new MetabaseSniperPageImpl();
         }
 

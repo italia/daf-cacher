@@ -16,7 +16,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.List;
 
-public class HTTPClient implements DataProvider{
+public class HTTPClient implements DataProvider {
     private URL apiHost;
     private Token token;
     private String authHeader;
@@ -40,7 +40,7 @@ public class HTTPClient implements DataProvider{
     }
 
     @Override
-    public List<EmbeddableData> getList() throws IOException{
+    public List<EmbeddableData> getList() throws IOException {
         if (this.token == null)
             throw new IllegalArgumentException("Client not authenticated");
 

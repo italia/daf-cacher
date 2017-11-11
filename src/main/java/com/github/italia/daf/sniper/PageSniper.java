@@ -39,7 +39,7 @@ public class PageSniper {
             return buffer;
         } catch (InterruptedException | TimeoutException | ExecutionException e) {
             future.cancel(true);
-            throw new TimeoutException("Page load timeout");
+            throw new TimeoutException("Page load timeout: " + url);
         } finally {
             executor.shutdownNow();
         }

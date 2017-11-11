@@ -19,10 +19,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
@@ -31,6 +28,10 @@ import java.util.logging.Logger;
 @SuppressWarnings("squid:S135")
 public class CacheWorker {
     private static final Logger LOGGER = LoggerFactory.getLogger(CacheWorker.class.getName());
+    private static final Map<String, Page> PAGE_MAP = new HashMap<>();
+
+    private static final String REDIS_Q = "daf-cacher:jobs";
+    private static final String REDIS_BPQ = "daf-cacher:jobsbq";
 
     public static void main(String[] args) throws IOException, URISyntaxException, TimeoutException {
 
@@ -48,6 +49,21 @@ public class CacheWorker {
             webDriver.quit();
         }));
 
+        final Page metabasePageHandler = new MetabaseSniperPageImpl();
+        final Page supersetPageHandler = new SupersetSniperPageImpl
+                .Builder()
+                .setSupersetLoginUrl(new URL(properties.getProperty("superset.login_url")))
+                .setCredential(new Credential(
+                        properties.getProperty("superset.user"),
+                        properties.getProperty("superset.password"))
+                )
+                .getSniperPage();
+
+        PAGE_MAP.put("metabase", metabasePageHandler);
+        PAGE_MAP.put("tdmetabase", metabasePageHandler);
+        PAGE_MAP.put("superset", supersetPageHandler);
+
+
         try (final Jedis jedis = new Jedis(new URI(properties.getProperty("caching.redis_host")))) {
             final Gson gson = new GsonBuilder().create();
             final List<Geometry> sizes = new ArrayList<>();
@@ -55,18 +71,8 @@ public class CacheWorker {
                     .stream(properties.getProperty("caching.geometries").split("\\s+"))
                     .forEach(x -> sizes.add(Geometry.fromString(x)));
 
-            final Page metabasePageHandler = new MetabaseSniperPageImpl();
-            final Page supersetPageHandler = new SupersetSniperPageImpl
-                    .Builder()
-                    .setSupersetLoginUrl(new URL(properties.getProperty("superset.login_url")))
-                    .setCredential(new Credential(
-                            properties.getProperty("superset.user"),
-                            properties.getProperty("superset.password"))
-                    )
-                    .getSniperPage();
-
             do {
-                final String embedPayload = jedis.brpoplpush("daf-cacher:jobs", "daf-cacher:jobsbq", 10);
+                final String embedPayload = jedis.brpoplpush(REDIS_Q, REDIS_BPQ, 10);
 
                 if (embedPayload == null)
                     continue;
@@ -81,6 +87,13 @@ public class CacheWorker {
 
                 LOGGER.log(Level.INFO, () -> "Processing url " + embeddableData.getIframeUrl() + "[origin=" + embeddableData.getOrigin() + "]");
 
+                final Page handler = PAGE_MAP.getOrDefault(embeddableData.getOrigin(), null);
+
+                if (handler == null) {
+                    LOGGER.log(Level.SEVERE, "Origin " + embeddableData.getOrigin() + " not supported");
+                    jedis.lrem(REDIS_BPQ, 1, embeddableData.getIdentifier());
+                    continue;
+                }
 
                 ScreenShotService service = new ScreenShotService.Builder()
                         .id(embeddableData.getIdentifier())
@@ -90,13 +103,13 @@ public class CacheWorker {
                         .ttl(Integer.parseInt(properties.getProperty("caching.ttl")))
                         .geometries(sizes)
                         .timeout(30)
-                        .setPageHandler(embeddableData.getOrigin().equals("superset") ? supersetPageHandler : metabasePageHandler)
+                        .setPageHandler(handler)
                         .build();
 
                 service.perform();
 
                 LOGGER.log(Level.INFO, () -> embeddableData.getIframeUrl() + " processed");
-                jedis.lrem("daf-cacher:jobsbq", 1, embeddableData.getIdentifier());
+                jedis.lrem(REDIS_BPQ, 1, embeddableData.getIdentifier());
             } while (true);
         }
 
