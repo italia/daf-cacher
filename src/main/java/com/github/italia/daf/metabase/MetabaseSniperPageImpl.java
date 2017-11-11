@@ -12,10 +12,15 @@ public class MetabaseSniperPageImpl implements Page {
     @Override
     public void visit(WebDriver driver, String url) {
         driver.get(url);
-        (new WebDriverWait(driver, 20))
-                .until(
-                        ExpectedConditions.invisibilityOf(
-                                driver.findElement(By.className("LoadingSpinner"))));
+        try {
+            (new WebDriverWait(driver, 20))
+                    .until(
+                            ExpectedConditions.invisibilityOf(
+                                    driver.findElement(By.className("LoadingSpinner"))));
+        } catch (org.openqa.selenium.NoSuchElementException e) {
+            // ignoring
+        }
+
         (new WebDriverWait(driver, 20))
                 .until(
                         ExpectedConditions.visibilityOf(
