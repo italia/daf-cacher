@@ -158,7 +158,7 @@ public class ApiService {
                     .webDriver(webDriver)
                     .plotUrl(new URL(data.getIframeUrl()))
                     .ttl(Integer.parseInt(properties.getProperty("caching.ttl")))
-                    .timeout(20);
+                    .timeout(30);
 
             if (!size.equals(ORIGINAL_SIZE))
                 builder.geometry(Geometry.fromString(size));

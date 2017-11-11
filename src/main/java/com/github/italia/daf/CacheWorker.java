@@ -42,7 +42,6 @@ public class CacheWorker {
                 .chrome()
                 .build()
                 .webDriver();
-        webDriver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             webDriver.close();
