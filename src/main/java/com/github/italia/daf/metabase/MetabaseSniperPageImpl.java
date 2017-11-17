@@ -14,7 +14,7 @@ public class MetabaseSniperPageImpl implements Page {
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         driver.get(url);
         (new WebDriverWait(driver, 20)).until((ExpectedCondition<Boolean>) d -> {
-            final String status = (String)((JavascriptExecutor)d).executeScript("return document.readyState");
+            final String status = (String) ((JavascriptExecutor) d).executeScript("return document.readyState");
             return status.equals("complete");
         });
 
