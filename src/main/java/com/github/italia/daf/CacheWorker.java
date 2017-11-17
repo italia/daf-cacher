@@ -20,12 +20,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@SuppressWarnings("squid:S135")
+@SuppressWarnings({"squid:S135", "squid:S3776"})
 public class CacheWorker {
     private static final Logger LOGGER = LoggerFactory.getLogger(CacheWorker.class.getName());
     private static final Map<String, Page> PAGE_MAP = new HashMap<>();
@@ -37,15 +36,40 @@ public class CacheWorker {
 
         final Properties properties = new Configuration(args[0]).load();
 
-        final WebDriver webDriver = new Browser
-                .Builder(new URL(properties.getProperty("caching.selenium_hub")))
-                .chrome()
-                .build()
-                .webDriver();
+        WebDriver webDriver;
+        int timeout = 30;
+        while (true) {
+            try {
+                webDriver = new Browser
+                        .Builder(new URL(properties.getProperty("caching.selenium_hub")))
+                        .chrome()
+                        .build()
+                        .webDriver();
+                LOGGER.info("WebDriver is ready to rocks");
+                break;
+            } catch (org.openqa.selenium.WebDriverException we) {
+                if (--timeout == 0) {
+                    LOGGER.log(Level.SEVERE, "Cannot obtain stable connection with Selenium backend");
+                    throw we;
+                }
+                try {
+                    LOGGER.info("Selenium is not ready. Retrying in 1s. Retries left: " + timeout);
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    LOGGER.warning("Interrupted!");
+                    Thread.currentThread().interrupt();
 
+                }
+            }
+        }
+
+
+        final WebDriver finalWebDriver = webDriver;
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            webDriver.close();
-            webDriver.quit();
+            if (finalWebDriver != null) {
+                finalWebDriver.close();
+                finalWebDriver.quit();
+            }
         }));
 
         final Page metabasePageHandler = new MetabaseSniperPageImpl();
@@ -84,7 +108,7 @@ public class CacheWorker {
                 EmbeddableData embeddableData = gson.fromJson(embedPayload, EmbeddableData.class);
 
 
-                LOGGER.log(Level.INFO, () -> "Processing url " + embeddableData.getIframeUrl() + "[origin=" + embeddableData.getOrigin() + "]");
+                LOGGER.log(Level.INFO, () -> "Processing url " + embeddableData.getIframeUrl() + " [origin=" + embeddableData.getOrigin() + "]");
 
                 final Page handler = PAGE_MAP.getOrDefault(embeddableData.getOrigin(), null);
 
