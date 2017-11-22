@@ -58,7 +58,6 @@ public class CacheWorker {
                 } catch (InterruptedException e) {
                     LOGGER.warning("Interrupted!");
                     Thread.currentThread().interrupt();
-
                 }
             }
         }
@@ -72,7 +71,7 @@ public class CacheWorker {
             }
         }));
 
-        final Page metabasePageHandler = new MetabaseSniperPageImpl();
+        final Page metabasePageHandler = new MetabaseSniperPageImpl(properties);
         final Page supersetPageHandler = new SupersetSniperPageImpl
                 .Builder()
                 .setSupersetLoginUrl(new URL(properties.getProperty("superset.login_url")))
@@ -80,6 +79,7 @@ public class CacheWorker {
                         properties.getProperty("superset.user"),
                         properties.getProperty("superset.password"))
                 )
+                .implicitWait(Integer.parseInt(properties.getProperty("caching.page_load_wait")))
                 .getSniperPage();
 
         PAGE_MAP.put("metabase", metabasePageHandler);
@@ -125,14 +125,14 @@ public class CacheWorker {
                         .plotUrl(new URL(embeddableData.getIframeUrl()))
                         .ttl(Integer.parseInt(properties.getProperty("caching.ttl")))
                         .geometries(sizes)
-                        .timeout(30)
+                        .timeout(Integer.parseInt(properties.getProperty("caching.selenium_timeout")))
                         .setPageHandler(handler)
                         .build();
 
                 service.perform();
 
                 LOGGER.log(Level.INFO, () -> embeddableData.getIframeUrl() + " processed");
-                jedis.lrem(REDIS_BPQ, 1, embeddableData.getIdentifier());
+                jedis.lrem(REDIS_BPQ, 1, embedPayload);
             } while (true);
         }
 

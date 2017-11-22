@@ -178,7 +178,7 @@ public class ApiService {
     private Page fromId(final String id) {
 
         if (id.startsWith("metabase_") || id.startsWith("tdmetabase_")) {
-            return new MetabaseSniperPageImpl();
+            return new MetabaseSniperPageImpl(properties);
         }
 
         if (id.startsWith("superset_")) {
@@ -187,6 +187,7 @@ public class ApiService {
                         .Builder()
                         .setCredential(supersetCredential)
                         .setSupersetLoginUrl(new URL(properties.getProperty("superset.login_url")))
+                        .implicitWait(Integer.parseInt(properties.getProperty("caching.page_load_wait")))
                         .getSniperPage();
             } catch (MalformedURLException e) {
                 /* ignored */

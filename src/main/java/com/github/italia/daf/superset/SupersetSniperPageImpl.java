@@ -11,8 +11,10 @@ public class SupersetSniperPageImpl implements Page {
     private boolean loggedIn = false;
     private String supersetLoginUrl;
     private Credential credential;
+    private int implicitWait;
 
     private SupersetSniperPageImpl() {
+        this.implicitWait = 10;
     }
 
     @Override
@@ -28,7 +30,7 @@ public class SupersetSniperPageImpl implements Page {
         webDriver.navigate().to(patchedUrl);
 
         try {
-            Thread.sleep(5000);
+            Thread.sleep(implicitWait * 1000);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
@@ -64,6 +66,11 @@ public class SupersetSniperPageImpl implements Page {
 
         public Builder setCredential(Credential credential) {
             sniperPage.credential = credential;
+            return this;
+        }
+
+        public Builder implicitWait(int timeout) {
+            sniperPage.implicitWait = timeout;
             return this;
         }
 

@@ -54,7 +54,7 @@ public class MetabaseSniperPageImplTest {
 
     @Before
     public void setUp() throws Exception {
-        metabaseSniperPage = new MetabaseSniperPageImpl();
+        metabaseSniperPage = new MetabaseSniperPageImpl(properties);
         provider = new IntegrationTestDataProvider();
     }
 

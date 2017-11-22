@@ -1,42 +1,47 @@
 package com.github.italia.daf.metabase;
 
 import com.github.italia.daf.sniper.Page;
+import com.github.italia.daf.utils.LoggerFactory;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 public class MetabaseSniperPageImpl implements Page {
+
+    private Properties properties;
+    private static final Logger LOGGER = LoggerFactory.getLogger(MetabaseSniperPageImpl.class.getName());
+
+    public MetabaseSniperPageImpl(final Properties properties) {
+        this.properties = properties;
+    }
+
     @Override
     public void visit(WebDriver driver, String url) {
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+
+        final int implicitWait = Integer.parseInt(properties.getProperty("caching.page_load_wait"));
+        driver.manage().timeouts().implicitlyWait(implicitWait, TimeUnit.SECONDS);
         driver.get(url);
-        (new WebDriverWait(driver, 20)).until((ExpectedCondition<Boolean>) d -> {
+        LOGGER.fine("Wait for JS complete");
+        (new WebDriverWait(driver, implicitWait)).until((ExpectedCondition<Boolean>) d -> {
             final String status = (String) ((JavascriptExecutor) d).executeScript("return document.readyState");
             return status.equals("complete");
         });
+        LOGGER.fine("JS complete");
 
-        try {
-            final WebElement spinner = driver.findElement(By.className("LoadingSpinner"));
-            if (spinner.isDisplayed()) {
 
-                (new WebDriverWait(driver, 20))
-                        .until(
-                                ExpectedConditions.invisibilityOf(spinner));
-
-            }
-        } catch (org.openqa.selenium.NoSuchElementException e) {
-            // ignoring
-        }
-
-        (new WebDriverWait(driver, 20))
+        LOGGER.fine("Wait for footer");
+        (new WebDriverWait(driver, implicitWait))
                 .until(
                         ExpectedConditions.visibilityOf(
                                 driver.findElement(By.name("downarrow"))));
+        LOGGER.info("Footer is there");
         try {
-            Thread.sleep(5000);
+            Thread.sleep(implicitWait * 1000);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

@@ -19,3 +19,7 @@ caching.redis_host=redis://redis:6379/2
 caching.refresh_every=30
 # A space separated geometry representation of pre-cached thumbs size
 caching.geometries=100x100 400x300 280x500 356x280
+# Global selenium load timeout in seconds
+caching.selenium_timeout=30
+# How long should pause until a page is considered fully loaded
+caching.page_load_wait=15
