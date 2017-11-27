@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
 set -x
-
-if [[ ! -f /etc/config.properties ]]; then
-    echo "/etc/config.properties file not found"
+DAF_CACHER_CONFIG_FILE=${DAF_CACHER_CONFIG_FILE:-/etc/config.properties}
+if [[ ! -f $DAF_CACHER_CONFIG_FILE ]]; then
+    echo "${DAF_CACHER_CONFIG_FILE} file not found"
     exit 1
 fi
 
-cp /etc/config.properties /usr/src/daf-metabase-cacher/
+cp $DAF_CACHER_CONFIG_FILE /usr/src/daf-metabase-cacher/config.properties
 
 export JAVA_OPTS="-Xms1024m -Xmx1024m"
 export JAVA_CLASS_PATH="/usr/src/daf-metabase-cacher/*:/usr/src/daf-metabase-cacher/dependency/*"

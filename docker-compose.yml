@@ -41,6 +41,7 @@ services:
       - GRID_BROWSER_TIMEOUT=100000
       - GRID_TIMEOUT=90000
       - GRID_NEW_SESSION_WAIT_TIMEOUT=300000
+      - JAVA_OPTS=-Dselenium.LOGGER.level=WARNING
 
 
   chrome:
@@ -54,3 +55,4 @@ services:
       HUB_PORT_4444_TCP_PORT: 4444
       NODE_MAX_INSTANCES: 60
       NODE_MAX_SESSION: 60
+      JAVA_OPTS: -Dselenium.LOGGER.level=WARNING
