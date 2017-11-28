@@ -14,7 +14,7 @@ spec:
     protocol: TCP
   selector:
     app: daf-metabase-cacher-be
----
+# ---
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
@@ -28,18 +28,21 @@ spec:
     spec:
       containers:
         - name: selenium-node-chrome
-          image: selenium/node-chrome-debug:2.53.0
+          image: selenium/node-chrome:3.7.1-beryllium
           ports:
-            - containerPort: 5900 
+            - containerPort: 5900
           env:
-            - name: HUB_PORT_4444_TCP_ADDR 
+            - name: HUB_PORT_4444_TCP_ADDR
               value: "localhost"
-            - name: HUB_PORT_4444_TCP_PORT 
+            - name: HUB_PORT_4444_TCP_PORT
               value: "4444"
             - name: NODE_MAX_INSTANCES
               value: "60"
             - name: NODE_MAX_SESSION
               value: "60"
+          volumeMounts:
+            - mountPath: /dev/shm
+              name: dshm
         - name: selenium
           image: selenium/hub
           ports:
@@ -47,9 +50,14 @@ spec:
           env:
             - name: GRID_MAX_SESSION
               value: "200"
-            - name: GRID_BRIWSER_TIMEOUT
+            - name: GRID_BROWSER_TIMEOUT
               value: "100000"
             - name: GRID_TIMEOUT
               value: "90000"
             - name: GRID_NEW_SESSION_WAIT_TIMEOUT
               value: "300000"
+      volumes:
+        - name: dshm
+          emptyDir:
+            medium: Memory
+
