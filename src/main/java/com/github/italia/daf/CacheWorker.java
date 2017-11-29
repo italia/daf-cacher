@@ -16,11 +16,11 @@ import org.openqa.selenium.WebDriver;
 import redis.clients.jedis.Jedis;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
-import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,12 +32,8 @@ public class CacheWorker {
     private static final String REDIS_Q = "daf-cacher:jobs";
     private static final String REDIS_BPQ = "daf-cacher:jobsbq";
 
-    public static void main(String[] args) throws IOException, URISyntaxException, TimeoutException {
-
-        final Properties properties = new Configuration(args[0]).load();
-
+    private static WebDriver getWebDriver(final Properties properties, int timeout) throws MalformedURLException {
         WebDriver webDriver;
-        int timeout = 30;
         while (true) {
             try {
                 webDriver = new Browser
@@ -46,7 +42,7 @@ public class CacheWorker {
                         .build()
                         .webDriver();
                 LOGGER.info("WebDriver is ready to rocks");
-                break;
+                return webDriver;
             } catch (org.openqa.selenium.WebDriverException we) {
                 if (--timeout == 0) {
                     LOGGER.log(Level.SEVERE, "Cannot obtain stable connection with Selenium backend");
@@ -61,13 +57,24 @@ public class CacheWorker {
                 }
             }
         }
+    }
+
+    public static void main(String[] args) throws IOException, URISyntaxException {
+
+        final Properties properties = new Configuration(args[0]).load();
+        int timeout = 30;
+        WebDriver webDriver = getWebDriver(properties, timeout);
 
 
         final WebDriver finalWebDriver = webDriver;
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            if (finalWebDriver != null) {
-                finalWebDriver.close();
-                finalWebDriver.quit();
+            try {
+                if (finalWebDriver != null) {
+                    finalWebDriver.close();
+                    finalWebDriver.quit();
+                }
+            } catch (Exception ex) {
+                // ignored
             }
         }));
 
@@ -118,18 +125,25 @@ public class CacheWorker {
                     continue;
                 }
 
-                ScreenShotService service = new ScreenShotService.Builder()
-                        .id(embeddableData.getIdentifier())
-                        .jedis(jedis)
-                        .webDriver(webDriver)
-                        .plotUrl(new URL(embeddableData.getIframeUrl()))
-                        .ttl(Integer.parseInt(properties.getProperty("caching.ttl")))
-                        .geometries(sizes)
-                        .timeout(Integer.parseInt(properties.getProperty("caching.selenium_timeout")))
-                        .setPageHandler(handler)
-                        .build();
+                try {
+                    ScreenShotService service = new ScreenShotService.Builder()
+                            .id(embeddableData.getIdentifier())
+                            .jedis(jedis)
+                            .webDriver(webDriver)
+                            .plotUrl(new URL(embeddableData.getIframeUrl()))
+                            .ttl(Integer.parseInt(properties.getProperty("caching.ttl")))
+                            .geometries(sizes)
+                            .timeout(Integer.parseInt(properties.getProperty("caching.selenium_timeout")))
+                            .setPageHandler(handler)
+                            .build();
 
-                service.perform();
+                    service.perform();
+                } catch (java.util.concurrent.TimeoutException tex) {
+                    LOGGER.log(Level.SEVERE, "Origin " + embeddableData.getOrigin() + " timeout ex");
+                    LOGGER.log(Level.SEVERE, "WebDriver instance might be tainted. Refresh it");
+                    webDriver = getWebDriver(properties, timeout);
+                    continue;
+                }
 
                 LOGGER.log(Level.INFO, () -> embeddableData.getIframeUrl() + " processed");
                 jedis.lrem(REDIS_BPQ, 1, embedPayload);
