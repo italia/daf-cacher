@@ -41,7 +41,7 @@ public class MetabaseSniperPageImpl implements Page {
                                 driver.findElement(By.name("downarrow"))));
         LOGGER.info("Footer is there");
         try {
-            Thread.sleep(implicitWait * 1000);
+            Thread.sleep(implicitWait * 1000l);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

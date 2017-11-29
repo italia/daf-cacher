@@ -30,7 +30,7 @@ public class SupersetSniperPageImpl implements Page {
         webDriver.navigate().to(patchedUrl);
 
         try {
-            Thread.sleep(implicitWait * 1000);
+            Thread.sleep(implicitWait * 1000l);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

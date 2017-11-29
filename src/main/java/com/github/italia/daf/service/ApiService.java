@@ -13,6 +13,7 @@ import com.github.italia.daf.utils.Resize;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.eclipse.jetty.server.AbstractNCSARequestLog;
 import org.openqa.selenium.WebDriver;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -20,6 +21,8 @@ import redis.clients.jedis.JedisPoolConfig;
 import spark.Request;
 import spark.Response;
 import spark.Service;
+import spark.embeddedserver.EmbeddedServers;
+import spark.embeddedserver.jetty.EmbeddedJettyFactory;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -44,10 +47,14 @@ public class ApiService {
     private Service sparkService;
     private Credential supersetCredential;
     private Credential dafApiCredential;
+    private AbstractNCSARequestLog requestLog;
 
 
     public ApiService(final Properties properties) throws URISyntaxException {
         this.properties = properties;
+        this.requestLog = new RequestLogFactory(LOGGER).create();
+        EmbeddedJettyFactory factory = new EmbeddedJettyFactoryConstructor(requestLog).create();
+        EmbeddedServers.add(EmbeddedServers.Identifiers.JETTY, factory);
 
         this.jedisPool = new JedisPool(new JedisPoolConfig(), new URI(properties.getProperty("caching.redis_host")));
         this.supersetCredential = new Credential(
@@ -63,14 +70,17 @@ public class ApiService {
     }
 
     public void start() {
+
         sparkService = Service
                 .ignite()
-                .threadPool(32, 2, 30000);
+                .threadPool(32, 2, 60000);
         sparkService.staticFiles.location("/public");
         handlePlotList();
         handlePlot();
         handleStatus();
+
         sparkService.awaitInitialization();
+
     }
 
     public void stop() {
@@ -244,4 +254,5 @@ public class ApiService {
         }
         return null;
     }
+
 }
