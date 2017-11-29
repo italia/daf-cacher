@@ -14,7 +14,7 @@ spec:
     protocol: TCP
   selector:
     app: daf-metabase-cacher-be
-# ---
+---
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
