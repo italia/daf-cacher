@@ -17,6 +17,8 @@ import org.openqa.selenium.WebDriver;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+import spark.Request;
+import spark.Response;
 import spark.Service;
 
 import java.io.IOException;
@@ -27,7 +29,6 @@ import java.net.URL;
 import java.util.Base64;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -68,6 +69,7 @@ public class ApiService {
         sparkService.staticFiles.location("/public");
         handlePlotList();
         handlePlot();
+        handleStatus();
         sparkService.awaitInitialization();
     }
 
@@ -139,6 +141,10 @@ public class ApiService {
         });
     }
 
+    private void handleStatus() {
+        sparkService.get("/status", (Request request, Response response) -> "OK");
+    }
+
     private byte[] handleNewSnap(final String id, final String size) throws IOException, TimeoutException {
 
         final EmbeddableData data = getAvailablePlotList()
@@ -167,11 +173,16 @@ public class ApiService {
             service.perform();
             return service.fetch(id, size);
         } finally {
-            if (webDriver != null) {
-                webDriver.close();
-                webDriver.quit();
+            try {
+                if (webDriver != null) {
+                    webDriver.close();
+                    webDriver.quit();
+                }
+            } catch (Exception ex) {
+                //Ignored
             }
         }
+
 
     }
 
@@ -222,13 +233,11 @@ public class ApiService {
 
     private WebDriver webDriver() {
         try {
-            WebDriver webDriver = new Browser
+            return new Browser
                     .Builder(new URL(properties.getProperty("caching.selenium_hub")))
                     .chrome()
                     .build()
                     .webDriver();
-            webDriver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
-            return webDriver;
         } catch (MalformedURLException e) {
             LOGGER.log(Level.SEVERE, "an exception was thrown", e);
 
