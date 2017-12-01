@@ -1,0 +1,27 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: daf-cacher-worker-deployment
+spec:
+  replicas: 6
+  template:
+    metadata:
+      labels:
+        app: daf-cacher-worker
+        name: daf-cacher-worker
+    spec:
+      containers:
+        - name: worker
+          image: 071817663189.dkr.ecr.us-west-1.amazonaws.com/daf-cacher:latest
+          args: ["worker"]
+          volumeMounts:
+            - name: confvolume
+              readOnly: true
+              mountPath: /etc/daf-cache/
+          env:
+            - name: DAF_CACHER_CONFIG_FILE
+              value: "/etc/daf-cache/config-docker.properties"
+      volumes:
+        - name: confvolume
+          secret:
+            secretName: daf-cacher-config

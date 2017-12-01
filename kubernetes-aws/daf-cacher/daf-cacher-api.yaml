@@ -1,0 +1,66 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: daf-cacher-fe-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: daf-cacher-fe
+        name: daf-cacher-api
+    spec:
+      containers:
+        - name: seeder
+          image: 071817663189.dkr.ecr.us-west-1.amazonaws.com/daf-cacher:latest
+          args: ["seeder"]
+          volumeMounts:
+            - name: confvolume
+              readOnly: true
+              mountPath: /etc/daf-cache/
+          env:
+            - name: DAF_CACHER_CONFIG_FILE
+              value: "/etc/daf-cache/config-docker.properties"
+        - name: api
+          image: 071817663189.dkr.ecr.us-west-1.amazonaws.com/daf-cacher:latest
+          args: ["server"]
+          volumeMounts:
+            - name: confvolume
+              readOnly: true
+              mountPath: /etc/daf-cache/
+          env:
+            - name: DAF_CACHER_CONFIG_FILE
+              value: "/etc/daf-cache/config-docker.properties"
+          ports:
+            - containerPort: 4567
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: 4567
+            initialDelaySeconds: 10
+            periodSeconds: 3
+      volumes:
+        - name: confvolume
+          secret:
+            secretName: daf-cacher-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:us-west-1:071817663189:certificate/64dde341-5355-4ef8-b930-03828cbe53b2"
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
+    external-dns.alpha.kubernetes.io/hostname: daf-cacher.taganaka.com.
+  name: daf-cacher-api
+  labels:
+    app: daf-cacher-fe-service
+spec:
+  selector:
+    app: daf-cacher-fe
+  type: LoadBalancer
+  ports:
+    - name: "https"
+      port: 443
+      targetPort: 4567
+      protocol: "TCP"
