@@ -47,8 +47,14 @@ public class SupersetSniperPageImpl implements Page {
         webDriver.findElement(By.id("username")).sendKeys(credential.getUsername());
         webDriver.findElement(By.id("password")).sendKeys(credential.getPassword());
         webDriver.findElement(By.id("password")).submit();
+
+        webDriver.findElement(By.id("dash_table"));
         loggedIn = true;
 
+    }
+
+    public void reset() {
+        this.loggedIn = false;
     }
 
     public static class Builder {

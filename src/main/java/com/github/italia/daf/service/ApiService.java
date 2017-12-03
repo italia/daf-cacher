@@ -55,8 +55,11 @@ public class ApiService {
         this.requestLog = new RequestLogFactory(LOGGER).create();
         EmbeddedJettyFactory factory = new EmbeddedJettyFactoryConstructor(requestLog).create();
         EmbeddedServers.add(EmbeddedServers.Identifiers.JETTY, factory);
+        final JedisPoolConfig poolConfig = new JedisPoolConfig();
+        poolConfig.setMaxTotal(128); // maximum active connections
+        poolConfig.setMaxIdle(32);  // maximum idle connections
 
-        this.jedisPool = new JedisPool(new JedisPoolConfig(), new URI(properties.getProperty("caching.redis_host")));
+        this.jedisPool = new JedisPool(poolConfig, new URI(properties.getProperty("caching.redis_host")));
         this.supersetCredential = new Credential(
                 properties.getProperty("superset.user"),
                 properties.getProperty("superset.password")
@@ -229,7 +232,7 @@ public class ApiService {
                 final List<EmbeddableData> dataList = client.getList();
                 jedis.setex(
                         REDIS_NS + "available-list",
-                        Integer.parseInt(properties.getProperty("caching.ttl")),
+                        Integer.parseInt(properties.getProperty("caching.ttl")) * 60,
                         new GsonBuilder().create().toJson(dataList)
                 );
                 return dataList;

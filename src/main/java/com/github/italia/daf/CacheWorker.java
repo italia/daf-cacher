@@ -32,6 +32,8 @@ public class CacheWorker {
     private static final String REDIS_Q = "daf-cacher:jobs";
     private static final String REDIS_BPQ = "daf-cacher:jobsbq";
 
+    private static final int REQUEST_RESET_AT = 10;
+
     private static WebDriver getWebDriver(final Properties properties, int timeout) throws MalformedURLException {
         WebDriver webDriver;
         while (true) {
@@ -63,20 +65,7 @@ public class CacheWorker {
 
         final Properties properties = new Configuration(args[0]).load();
         int timeout = 30;
-        WebDriver webDriver = getWebDriver(properties, timeout);
-
-
-        final WebDriver finalWebDriver = webDriver;
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                if (finalWebDriver != null) {
-                    finalWebDriver.close();
-                    finalWebDriver.quit();
-                }
-            } catch (Exception ex) {
-                // ignored
-            }
-        }));
+        int maxRequest = REQUEST_RESET_AT;
 
         final Page metabasePageHandler = new MetabaseSniperPageImpl(properties);
         final Page supersetPageHandler = new SupersetSniperPageImpl
@@ -95,6 +84,7 @@ public class CacheWorker {
 
 
         try (final Jedis jedis = new Jedis(new URI(properties.getProperty("caching.redis_host")))) {
+            WebDriver webDriver = getWebDriver(properties, timeout);
             final Gson gson = new GsonBuilder().create();
             final List<Geometry> sizes = new ArrayList<>();
             Arrays
@@ -104,8 +94,11 @@ public class CacheWorker {
             do {
                 final String embedPayload = jedis.brpoplpush(REDIS_Q, REDIS_BPQ, 10);
 
-                if (embedPayload == null)
+                if (embedPayload == null) {
+                    maxRequest = 0;
                     continue;
+
+                }
 
                 if (embedPayload.equals("EXIT")) {
                     LOGGER.log(Level.INFO, () -> "Magic word received ... exiting from the main loop");
@@ -125,7 +118,26 @@ public class CacheWorker {
                     continue;
                 }
 
+                if (maxRequest == 0) {
+                    LOGGER.log(Level.INFO, "Max number of request reached. Refreshing WebDriver");
+                    try {
+                        if (webDriver != null) {
+                            webDriver.close();
+                            webDriver.quit();
+                        }
+                    } catch (Exception e) {
+                        // ignored
+                    } finally {
+                        maxRequest = REQUEST_RESET_AT;
+                        ((SupersetSniperPageImpl) supersetPageHandler).reset();
+                        webDriver = getWebDriver(properties, timeout);
+                    }
+
+                }
+
+
                 try {
+                    maxRequest--;
                     ScreenShotService service = new ScreenShotService.Builder()
                             .id(embeddableData.getIdentifier())
                             .jedis(jedis)
@@ -139,9 +151,9 @@ public class CacheWorker {
 
                     service.perform();
                 } catch (java.util.concurrent.TimeoutException tex) {
-                    LOGGER.log(Level.SEVERE, "Origin " + embeddableData.getOrigin() + " timeout ex");
-                    LOGGER.log(Level.SEVERE, "WebDriver instance might be tainted. Refresh it");
-                    webDriver = getWebDriver(properties, timeout);
+                    LOGGER.log(Level.SEVERE, "Origin " + embeddableData.getOrigin() + " timeout ex", tex);
+                    LOGGER.log(Level.SEVERE, "WebDriver instance might be tainted. Refreshing it at the next iteration");
+                    maxRequest = 0;
                     continue;
                 }
 

@@ -1,16 +1,20 @@
 package com.github.italia.daf.sniper;
 
+import com.github.italia.daf.utils.LoggerFactory;
 import org.openqa.selenium.WebDriver;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class PageSniper {
     private static final String ERROR_MSG = "Unable to save the viewport buffer";
     private WebDriver driver;
     private int timeout;
     private Page pageHandler;
+    private static final Logger LOGGER = LoggerFactory.getLogger(PageSniper.class.getName());
 
     public PageSniper(WebDriver driver, int timeOutInSecond) {
         this.driver = driver;
@@ -38,6 +42,7 @@ public class PageSniper {
                 throw new IOException(ERROR_MSG);
             return buffer;
         } catch (InterruptedException | TimeoutException | ExecutionException e) {
+            LOGGER.log(Level.SEVERE, "Future execution exception", e);
             future.cancel(true);
             throw new TimeoutException("Page load timeout: " + url);
         } finally {
