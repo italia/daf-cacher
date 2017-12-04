@@ -1,5 +1,7 @@
 # daf-cacher
-
+[![Join the #daf-cacher channel](https://img.shields.io/badge/Slack%20channel-%23daf--cacher-blue.svg)](https://developersitalia.slack.com/messages/C7X6L03C6/)
+ [![Get invited](https://slack.developers.italia.it/badge.svg)](https://slack.developers.italia.it/)
+ 
 A microservice to cache DAF plots
 
 This microservice is used by [daf-dataportal](https://github.com/italia/daf-dataportal),
