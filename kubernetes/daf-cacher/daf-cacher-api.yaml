@@ -1,0 +1,52 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: daf-cacher-fe-deployment
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: daf-cacher-fe
+        name: daf-cacher-api
+    spec:
+      containers:
+        - name: api
+          image: 10.98.74.120:5000/daf-metabase-cacher:1.0
+          args: ["server"]
+          volumeMounts:
+            - name: confvolume
+              readOnly: true
+              mountPath: /etc/daf-cache/
+          env:
+            - name: DAF_CACHER_CONFIG_FILE
+              value: "/etc/daf-cache/config.properties"
+          ports:
+            - containerPort: 4567
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: 4567
+            initialDelaySeconds: 10
+            periodSeconds: 3
+      imagePullSecrets:
+        - name: regsecret
+      volumes:
+        - name: confvolume
+          secret:
+            secretName: daf-cacher-config
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: daf-cacher-fe
+spec:
+  ports:
+  - name: daf-cacher-fe
+    port: 4567
+    targetPort: 4567
+    protocol: TCP
+  selector:
+    app: daf-cacher-fe

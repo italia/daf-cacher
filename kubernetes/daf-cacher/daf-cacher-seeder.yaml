@@ -1,27 +1,30 @@
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: daf-cacher-worker-deployment
+  name: daf-cacher-seeder-deployment
 spec:
-  replicas: 6
+  replicas: 1
   template:
     metadata:
       labels:
-        app: daf-cacher-worker
-        name: daf-cacher-worker
+        app: daf-cacher-seeder
+        name: daf-cacher-seeder
     spec:
       containers:
-        - name: worker
-          image: 071817663189.dkr.ecr.us-west-1.amazonaws.com/daf-cacher:latest
-          args: ["worker"]
+        - name: seeder
+          image: 10.98.74.120:5000/daf-metabase-cacher:1.0
+          args: ["seeder"]
           volumeMounts:
             - name: confvolume
               readOnly: true
               mountPath: /etc/daf-cache/
           env:
             - name: DAF_CACHER_CONFIG_FILE
-              value: "/etc/daf-cache/config-docker.properties"
+              value: "/etc/daf-cache/config.properties"
+      imagePullSecrets:
+        - name: regsecret
       volumes:
         - name: confvolume
           secret:
             secretName: daf-cacher-config
+

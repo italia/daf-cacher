@@ -11,3 +11,4 @@ __pycache__
 .settings
 metabase-data-test/
 superset-data-test/
+*-aws-service.yaml

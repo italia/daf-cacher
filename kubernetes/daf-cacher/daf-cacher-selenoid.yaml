@@ -1,0 +1,59 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: daf-cacher-selenium-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: daf-cacher-selenium
+        name: daf-cacher-selenium
+    spec:
+      containers:
+        - name: selenoid
+          image: aerokube/selenoid:latest-release
+          ports:
+            - containerPort: 4444
+          env:
+            - name: DOCKER_API_VERSION
+              value: "1.24"
+          volumeMounts:
+            - mountPath: /var/run/docker.sock
+              name: docker-socket
+            - name: config-volume
+              mountPath: /etc/selenoid/
+        - name: selenoid-ui
+          image: aerokube/selenoid-ui
+          args: ["--selenoid-uri", "http://localhost:4444"]
+          ports:
+            - containerPort: 8080
+        - name: selenoid-chrome
+          image: selenoid/vnc:chrome_62.0
+          command: ["/bin/sh"]
+          args: ["-c", "while :; do sleep 2073600; done"]
+
+      volumes:
+        - name: docker-socket
+          hostPath:
+            path: /var/run/docker.sock
+        - name: config-volume
+          configMap:
+            name: selenoid
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: selenium
+spec:
+  ports:
+  - name: selenium
+    port: 4444
+    targetPort: 4444
+    protocol: TCP
+  - name: selenoid-ui
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+  selector:
+    app: daf-cacher-selenium
